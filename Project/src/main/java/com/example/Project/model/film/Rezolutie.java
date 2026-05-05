@@ -1,15 +1,15 @@
-package com.example.Project.model;
+package com.example.Project.model.film;
 
 public enum Rezolutie {
     TINY("144p"),
     LOW("240p"),
-    SD( "360p"),
-    DVD( "480p"),
-    HD( "720p"),
-    FULL_HD( "1080p"),
-    QHD( "1440p"),
-    UHD( "4K"),
-    UHD_8K( "8K");
+    SD("360p"),
+    DVD("480p"),
+    HD("720p"),
+    FULL_HD("1080p"),
+    QHD("1440p"),
+    UHD("4K"),
+    UHD_8K("8K");
 
     private final String label;
 
@@ -21,6 +21,6 @@ public enum Rezolutie {
 
     @Override
     public String toString() {
-        return "Rezolutie de" + label;
+        return "Rezolutie de " + label;
     }
 }

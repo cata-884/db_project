@@ -1,4 +1,4 @@
-package com.example.Project.model;
+package com.example.Project.model.recenzie;
 
 public enum Eticheta {
     // Sentiment general

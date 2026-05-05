@@ -1,6 +1,6 @@
-package com.example.Project.model;
+package com.example.Project.model.film;
 
-public enum Format{
+public enum Format {
     THEATRICAL_CUT,
     DIRECTORS_CUT,
     EXTENDED_EDITION,

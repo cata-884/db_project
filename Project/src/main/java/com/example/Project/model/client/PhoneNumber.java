@@ -1,4 +1,4 @@
-package com.example.Project.model;
+package com.example.Project.model.client;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -6,6 +6,6 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public class PhoneNumber {
-    CountryCode code;
-    String number;
+    private CountryCode code;
+    private String number;
 }

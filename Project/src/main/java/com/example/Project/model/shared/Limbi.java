@@ -1,6 +1,6 @@
-package com.example.Project.model;
+package com.example.Project.model.shared;
 
-public enum Limbi{
+public enum Limbi {
     ROMANIAN("romana"),
     ENGLISH("engleza"),
     GERMAN("germana"),
@@ -16,6 +16,6 @@ public enum Limbi{
 
     @Override
     public String toString() {
-        return "Limba" + nume;
+        return "Limba " + nume;
     }
 }
