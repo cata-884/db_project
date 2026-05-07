@@ -27,7 +27,6 @@ CREATE TABLE filme (
 CREATE TABLE versiuni_film (
     id                  NUMBER DEFAULT seq_versiuni.NEXTVAL PRIMARY KEY,
     id_film             NUMBER NOT NULL REFERENCES filme(id),
-    denumire_versiune   VARCHAR2(200),
     rezolutie           VARCHAR2(10)  CHECK (rezolutie IN ('TINY','LOW','SD','DVD','HD','FULL_HD','QHD','UHD','UHD_8K')),
     limbi               VARCHAR2(15)  CHECK (limbi     IN ('ROMANIAN','ENGLISH','GERMAN','RUSSIAN','SPANISH','OTHER')),
     format              VARCHAR2(30)  CHECK (format    IN ('THEATRICAL_CUT','DIRECTORS_CUT','EXTENDED_EDITION','DUBBED_VERSION','SUBBED_VERSION'))
@@ -46,7 +45,6 @@ CREATE TABLE distributie (
     id_film         NUMBER NOT NULL REFERENCES filme(id),
     id_actor        NUMBER NOT NULL REFERENCES actori(id),
     rol             VARCHAR2(20) NOT NULL CHECK (rol IN ('PROTAGONIST','ANTAGONIST','SECUNDAR','EPISODIC','DUBLURA')),
-    comentariu      VARCHAR2(500),
     CONSTRAINT pk_distributie PRIMARY KEY (id_film, id_actor)
 );
 

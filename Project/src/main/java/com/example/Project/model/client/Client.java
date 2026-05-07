@@ -17,4 +17,8 @@ public class Client {
     private String email;
     private PhoneNumber cellphone;
     private LocalDate dataNastere;
+
+    private String username;
+    private String parola;
+
 }
