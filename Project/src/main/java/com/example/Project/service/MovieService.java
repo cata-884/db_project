@@ -1,6 +1,7 @@
 package com.example.Project.service;
 
 import com.example.Project.dao.MovieDao;
+import com.example.Project.exception.NotFoundException;
 import com.example.Project.model.film.Movie;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -19,7 +20,7 @@ public class MovieService {
 
     public Movie getById(Long id) {
         return movieDao.findById(id)
-                .orElseThrow(() -> new RuntimeException("Filmul cu id " + id + " nu există"));
+                .orElseThrow(() -> new NotFoundException("Filmul cu id " + id + " nu există"));
     }
 
     public List<Movie> getByCategorie(Long idCategorie) {
@@ -36,12 +37,12 @@ public class MovieService {
         if (movie.getTitlu() == null || movie.getTitlu().isBlank())
             throw new IllegalArgumentException("Titlul filmului este obligatoriu");
         int rows = movieDao.update(id, movie);
-        if (rows == 0) throw new RuntimeException("Filmul cu id " + id + " nu există");
+        if (rows == 0) throw new NotFoundException("Filmul cu id " + id + " nu există");
         return movieDao.findById(id).orElseThrow();
     }
 
     public void delete(Long id) {
         int rows = movieDao.deleteById(id);
-        if (rows == 0) throw new RuntimeException("Filmul cu id " + id + " nu există");
+        if (rows == 0) throw new NotFoundException("Filmul cu id " + id + " nu există");
     }
 }

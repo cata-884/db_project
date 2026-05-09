@@ -1,6 +1,7 @@
 package com.example.Project.service;
 
 import com.example.Project.dao.CategorieDao;
+import com.example.Project.exception.NotFoundException;
 import com.example.Project.model.film.Categorie;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -19,7 +20,7 @@ public class CategorieService {
 
     public Categorie getById(Long id) {
         return categorieDao.findById(id)
-                .orElseThrow(() -> new RuntimeException("Categoria cu id " + id + " nu există"));
+                .orElseThrow(() -> new NotFoundException("Categoria cu id " + id + " nu există"));
     }
 
     public Categorie create(Categorie categorie) {
@@ -32,12 +33,12 @@ public class CategorieService {
         if (categorie.getNume() == null || categorie.getNume().isBlank())
             throw new IllegalArgumentException("Numele categoriei este obligatoriu");
         int rows = categorieDao.update(id, categorie);
-        if (rows == 0) throw new RuntimeException("Categoria cu id " + id + " nu există");
+        if (rows == 0) throw new NotFoundException("Categoria cu id " + id + " nu există");
         return categorieDao.findById(id).orElseThrow();
     }
 
     public void delete(Long id) {
         int rows = categorieDao.deleteById(id);
-        if (rows == 0) throw new RuntimeException("Categoria cu id " + id + " nu există");
+        if (rows == 0) throw new NotFoundException("Categoria cu id " + id + " nu există");
     }
 }

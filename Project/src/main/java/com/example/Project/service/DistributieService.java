@@ -1,6 +1,7 @@
 package com.example.Project.service;
 
 import com.example.Project.dao.DistributieDao;
+import com.example.Project.exception.NotFoundException;
 import com.example.Project.dto.request.CreateDistributieRequest;
 import com.example.Project.dto.response.ActorDistributieResponse;
 import com.example.Project.model.actor.Distributie;
@@ -28,6 +29,6 @@ public class DistributieService {
 
     public void delete(Long idFilm, Long idActor) {
         int rows = distributieDao.delete(idFilm, idActor);
-        if (rows == 0) throw new RuntimeException("Distribuția nu există");
+        if (rows == 0) throw new NotFoundException("Distribuția nu există");
     }
 }

@@ -1,6 +1,7 @@
 package com.example.Project.service;
 
 import com.example.Project.dao.RecenzieDao;
+import com.example.Project.exception.NotFoundException;
 import com.example.Project.dto.request.CreateRecenzieRequest;
 import com.example.Project.dto.request.UpdateRecenzieRequest;
 import com.example.Project.dto.response.RecenzieDetailResponse;
@@ -23,7 +24,7 @@ public class RecenzieService {
 
     public RecenzieResponse getById(Long id) {
         return recenzieDao.findById(id)
-                .orElseThrow(() -> new RuntimeException("Recenzia cu id " + id + " nu există"));
+                .orElseThrow(() -> new NotFoundException("Recenzia cu id " + id + " nu există"));
     }
 
     public RecenzieDetailResponse create(CreateRecenzieRequest req) {
@@ -46,13 +47,13 @@ public class RecenzieService {
         if (req.getNota() != null && (req.getNota() < 1 || req.getNota() > 10))
             throw new IllegalArgumentException("Nota trebuie să fie între 1 și 10");
         int rows = recenzieDao.update(id, req);
-        if (rows == 0) throw new RuntimeException("Recenzia cu id " + id + " nu există");
+        if (rows == 0) throw new NotFoundException("Recenzia cu id " + id + " nu există");
         return recenzieDao.findById(id).orElseThrow();
     }
 
     public void delete(Long id) {
         int rows = recenzieDao.deleteById(id);
-        if (rows == 0) throw new RuntimeException("Recenzia cu id " + id + " nu există");
+        if (rows == 0) throw new NotFoundException("Recenzia cu id " + id + " nu există");
     }
 
     public List<RecenzieDetailResponse> getByFilm(Long idFilm) {

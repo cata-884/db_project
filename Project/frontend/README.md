@@ -8,7 +8,7 @@ Minimal frontend pentru proiectul de BD (filme). Ruleaza pe `http://localhost:51
 
 ## Rulare rapida
 ```bash
-cd /home/cata884/Downloads/db_project/Project/frontend
+cd Project/frontend
 npm install
 npm run dev
 ```

@@ -1,6 +1,7 @@
 package com.example.Project.service;
 
 import com.example.Project.dao.RecenzieEtichetaDao;
+import com.example.Project.exception.NotFoundException;
 import com.example.Project.model.recenzie.EtichetaRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -25,6 +26,6 @@ public class RecenzieEtichetaService {
 
     public void removeEticheta(Long idRecenzie, Long idEticheta) {
         int rows = recenzieEtichetaDao.removeEticheta(idRecenzie, idEticheta);
-        if (rows == 0) throw new RuntimeException("Asocierea recenzie-eticheta nu există");
+        if (rows == 0) throw new NotFoundException("Asocierea recenzie-eticheta nu există");
     }
 }

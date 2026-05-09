@@ -43,7 +43,7 @@ public class MovieDao {
 
     public List<Movie> findByCategorieId(Long idCategorie) {
         return jdbcTemplate.query(
-                "SELECT id, titlu, descriere, data_lansare, id_categorie, rating FROM filme WHERE id_categorie = ? ORDER BY rating DESC",
+                "SELECT id, titlu, descriere, data_lansare, id_categorie, rating FROM filme WHERE id_categorie = ? ORDER BY rating DESC NULLS LAST",
                 ROW_MAPPER, idCategorie);
     }
 

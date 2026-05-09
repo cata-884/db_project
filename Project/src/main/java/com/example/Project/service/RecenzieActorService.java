@@ -1,6 +1,7 @@
 package com.example.Project.service;
 
 import com.example.Project.dao.RecenzieActorDao;
+import com.example.Project.exception.NotFoundException;
 import com.example.Project.dto.request.CreateRecenzieActorRequest;
 import com.example.Project.model.recenzie.RecenziiActori;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +27,6 @@ public class RecenzieActorService {
 
     public void delete(Long idRecenzie, Long idActor) {
         int rows = recenzieActorDao.delete(idRecenzie, idActor);
-        if (rows == 0) throw new RuntimeException("Recenzia actorului nu există");
+        if (rows == 0) throw new NotFoundException("Recenzia actorului nu există");
     }
 }

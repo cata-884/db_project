@@ -1,6 +1,7 @@
 package com.example.Project.service;
 
 import com.example.Project.dao.VizualizareDao;
+import com.example.Project.exception.NotFoundException;
 import com.example.Project.dto.request.CreateVizualizareRequest;
 import com.example.Project.dto.response.IstoricVizionareResponse;
 import com.example.Project.model.client.Vizualizari;
@@ -21,7 +22,7 @@ public class VizualizareService {
 
     public Vizualizari getById(Long id) {
         return vizualizareDao.findById(id)
-                .orElseThrow(() -> new RuntimeException("Vizualizarea cu id " + id + " nu există"));
+                .orElseThrow(() -> new NotFoundException("Vizualizarea cu id " + id + " nu există"));
     }
 
     public Vizualizari create(CreateVizualizareRequest req) {
@@ -33,13 +34,13 @@ public class VizualizareService {
 
     public Vizualizari update(Long id, Vizualizari viz) {
         int rows = vizualizareDao.update(id, viz);
-        if (rows == 0) throw new RuntimeException("Vizualizarea cu id " + id + " nu există");
+        if (rows == 0) throw new NotFoundException("Vizualizarea cu id " + id + " nu există");
         return vizualizareDao.findById(id).orElseThrow();
     }
 
     public void delete(Long id) {
         int rows = vizualizareDao.deleteById(id);
-        if (rows == 0) throw new RuntimeException("Vizualizarea cu id " + id + " nu există");
+        if (rows == 0) throw new NotFoundException("Vizualizarea cu id " + id + " nu există");
     }
 
     public List<IstoricVizionareResponse> getIstoricByClient(Long idClient) {

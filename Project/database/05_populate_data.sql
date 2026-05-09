@@ -259,6 +259,20 @@ BEGIN
                    );
         END LOOP;
 
+    FOR f IN (SELECT id FROM filme) LOOP
+            INSERT INTO versiuni_film (id, id_film, rezolutie, limbi, format)
+            VALUES (
+                       seq_versiuni.NEXTVAL,
+                       f.id,
+                       DECODE(TRUNC(DBMS_RANDOM.VALUE(0, 9)), 0, 'TINY', 1, 'LOW', 2, 'SD', 3, 'DVD', 4, 'HD', 5,
+                              'FULL_HD', 6, 'QHD', 7, 'UHD', 'UHD_8K'),
+                       DECODE(TRUNC(DBMS_RANDOM.VALUE(0, 6)), 0, 'ROMANIAN', 1, 'ENGLISH', 2, 'GERMAN', 3, 'RUSSIAN', 4,
+                              'SPANISH', 'OTHER'),
+                       DECODE(TRUNC(DBMS_RANDOM.VALUE(0, 5)), 0, 'THEATRICAL_CUT', 1, 'DIRECTORS_CUT', 2,
+                              'EXTENDED_EDITION', 3, 'DUBBED_VERSION', 'SUBBED_VERSION')
+                   );
+        END LOOP;
+
     FOR i IN 1..25 LOOP
             SELECT id INTO v_id_1 FROM (SELECT id FROM filme ORDER BY DBMS_RANDOM.VALUE()) FETCH FIRST 1 ROW ONLY;
             INSERT INTO versiuni_film (id, id_film, rezolutie, limbi, format)
@@ -343,7 +357,7 @@ BEGIN
         END LOOP;
 
     -- VIZUALIZARI
-    FOR i IN 1..30 LOOP
+    FOR i IN 1..120 LOOP
             SELECT id INTO v_id_1 FROM (SELECT id FROM clienti      ORDER BY DBMS_RANDOM.VALUE()) FETCH FIRST 1 ROW ONLY;
             SELECT id INTO v_id_2 FROM (SELECT id FROM versiuni_film ORDER BY DBMS_RANDOM.VALUE()) FETCH FIRST 1 ROW ONLY;
             v_idx       := TRUNC(DBMS_RANDOM.VALUE(1, l_stari.COUNT + 1));
@@ -360,7 +374,7 @@ BEGIN
         END LOOP;
 
     -- RECENZII
-    FOR i IN 1..30 LOOP
+    FOR i IN 1..120 LOOP
             BEGIN
                 SELECT id INTO v_id_1 FROM (SELECT id FROM clienti ORDER BY DBMS_RANDOM.VALUE()) FETCH FIRST 1 ROW ONLY;
                 SELECT id INTO v_id_2 FROM (SELECT id FROM filme    ORDER BY DBMS_RANDOM.VALUE()) FETCH FIRST 1 ROW ONLY;

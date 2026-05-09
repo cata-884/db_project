@@ -1,6 +1,7 @@
 package com.example.Project.service;
 
 import com.example.Project.dao.ActorDao;
+import com.example.Project.exception.NotFoundException;
 import com.example.Project.dto.response.ActorDistributieResponse;
 import com.example.Project.model.actor.Actor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +23,7 @@ public class ActorService {
 
     public Actor getById(Long id) {
         return actorDao.findById(id)
-                .orElseThrow(() -> new RuntimeException("Actorul cu id " + id + " nu există"));
+                .orElseThrow(() -> new NotFoundException("Actorul cu id " + id + " nu există"));
     }
 
     public Actor create(Actor actor) {
@@ -35,13 +36,13 @@ public class ActorService {
 
     public Actor update(Long id, Actor actor) {
         int rows = actorDao.update(id, actor);
-        if (rows == 0) throw new RuntimeException("Actorul cu id " + id + " nu există");
+        if (rows == 0) throw new NotFoundException("Actorul cu id " + id + " nu există");
         return actorDao.findById(id).orElseThrow();
     }
 
     public void delete(Long id) {
         int rows = actorDao.deleteById(id);
-        if (rows == 0) throw new RuntimeException("Actorul cu id " + id + " nu există");
+        if (rows == 0) throw new NotFoundException("Actorul cu id " + id + " nu există");
     }
 
     public List<ActorDistributieResponse> getByFilm(Long idFilm) {
