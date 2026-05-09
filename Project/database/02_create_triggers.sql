@@ -79,19 +79,24 @@ SHOW ERRORS;
 --   1-3  -> NEGATIV
 --   4-7  -> NEUTRU
 --   8-10 -> POZITIV
+-- Daca nota este NULL si exista comentariu, se foloseste f_analiza_sentiment.
 CREATE OR REPLACE TRIGGER trg_set_sentiment_recenzie
     BEFORE INSERT OR UPDATE ON recenzii
                                 FOR EACH ROW
 BEGIN
-    IF :NEW.sentiment IS NULL AND :NEW.nota IS NOT NULL THEN
-        IF :NEW.nota BETWEEN 1 AND 3 THEN
-            :NEW.sentiment := 'NEGATIV';
-        ELSIF :NEW.nota BETWEEN 4 AND 7 THEN
-            :NEW.sentiment := 'NEUTRU';
-ELSE
-            :NEW.sentiment := 'POZITIV';
-END IF;
-END IF;
+    IF :NEW.sentiment IS NULL THEN
+        IF :NEW.nota IS NOT NULL THEN
+            IF :NEW.nota BETWEEN 1 AND 3 THEN
+                :NEW.sentiment := 'NEGATIV';
+            ELSIF :NEW.nota BETWEEN 4 AND 7 THEN
+                :NEW.sentiment := 'NEUTRU';
+            ELSE
+                :NEW.sentiment := 'POZITIV';
+            END IF;
+        ELSIF :NEW.text_comentariu IS NOT NULL AND LENGTH(TRIM(:NEW.text_comentariu)) > 0 THEN
+            :NEW.sentiment := f_analiza_sentiment(:NEW.text_comentariu);
+        END IF;
+    END IF;
 END trg_set_sentiment_recenzie;
 /
 SHOW ERRORS;

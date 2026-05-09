@@ -2,8 +2,6 @@ SET SERVEROUTPUT ON;
 
 DECLARE
 
-    -- EXISTA ERORI DE TIP ROWNUM = 1
-
     TYPE varr IS VARRAY(1000) OF VARCHAR2(500);
 
     l_cat varr := varr(
@@ -245,7 +243,7 @@ BEGIN
         END LOOP;
     FOR i IN 1..20 LOOP
             v_cat_nume := l_f_cat(i);
-            SELECT id INTO v_id_1 FROM (SELECT id FROM categorii WHERE nume = v_cat_nume) WHERE ROWNUM = 1;
+            SELECT id INTO v_id_1 FROM (SELECT id FROM categorii WHERE nume = v_cat_nume) FETCH FIRST 1 ROW ONLY;
 
             v_titlu    := l_f_titlu(i);
             v_desc_val := l_f_desc(i);
@@ -298,7 +296,7 @@ BEGIN
     FOR f IN (SELECT id FROM filme) LOOP
             FOR i IN 1..3 LOOP
                     BEGIN
-                        SELECT id INTO v_id_1 FROM (SELECT id FROM actori ORDER BY DBMS_RANDOM.VALUE()) WHERE ROWNUM = 1;
+                        SELECT id INTO v_id_1 FROM (SELECT id FROM actori ORDER BY DBMS_RANDOM.VALUE()) FETCH FIRST 1 ROW ONLY;
                         v_idx := TRUNC(DBMS_RANDOM.VALUE(1, l_roluri.COUNT + 1));
                         v_rol := l_roluri(v_idx);
                         INSERT INTO distributie (id_film, id_actor, rol)
@@ -346,8 +344,8 @@ BEGIN
 
     -- VIZUALIZARI
     FOR i IN 1..30 LOOP
-            SELECT id INTO v_id_1 FROM (SELECT id FROM clienti      ORDER BY DBMS_RANDOM.VALUE()) WHERE ROWNUM = 1;
-            SELECT id INTO v_id_2 FROM (SELECT id FROM versiuni_film ORDER BY DBMS_RANDOM.VALUE()) WHERE ROWNUM = 1;
+            SELECT id INTO v_id_1 FROM (SELECT id FROM clienti      ORDER BY DBMS_RANDOM.VALUE()) FETCH FIRST 1 ROW ONLY;
+            SELECT id INTO v_id_2 FROM (SELECT id FROM versiuni_film ORDER BY DBMS_RANDOM.VALUE()) FETCH FIRST 1 ROW ONLY;
             v_idx       := TRUNC(DBMS_RANDOM.VALUE(1, l_stari.COUNT + 1));
             v_stare_val := l_stari(v_idx);
             INSERT INTO vizualizari (id, id_client, id_versiune, data_vizualizare, durata, stare)
@@ -364,8 +362,8 @@ BEGIN
     -- RECENZII
     FOR i IN 1..30 LOOP
             BEGIN
-                SELECT id INTO v_id_1 FROM (SELECT id FROM clienti ORDER BY DBMS_RANDOM.VALUE()) WHERE ROWNUM = 1;
-                SELECT id INTO v_id_2 FROM (SELECT id FROM filme    ORDER BY DBMS_RANDOM.VALUE()) WHERE ROWNUM = 1;
+                SELECT id INTO v_id_1 FROM (SELECT id FROM clienti ORDER BY DBMS_RANDOM.VALUE()) FETCH FIRST 1 ROW ONLY;
+                SELECT id INTO v_id_2 FROM (SELECT id FROM filme    ORDER BY DBMS_RANDOM.VALUE()) FETCH FIRST 1 ROW ONLY;
 
                 v_idx := TRUNC(DBMS_RANDOM.VALUE(0, 3));
                 IF v_idx = 0 THEN
@@ -399,7 +397,7 @@ BEGIN
     FOR r IN (SELECT id FROM recenzii) LOOP
             FOR i IN 1..2 LOOP
                     BEGIN
-                        SELECT id INTO v_id_1 FROM (SELECT id FROM etichete ORDER BY DBMS_RANDOM.VALUE()) WHERE ROWNUM = 1;
+                        SELECT id INTO v_id_1 FROM (SELECT id FROM etichete ORDER BY DBMS_RANDOM.VALUE()) FETCH FIRST 1 ROW ONLY;
                         INSERT INTO recenzii_etichete (id_recenzie, id_eticheta) VALUES (r.id, v_id_1);
                     EXCEPTION WHEN DUP_VAL_ON_INDEX THEN NULL;
                     END;
