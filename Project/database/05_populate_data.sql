@@ -238,7 +238,6 @@ DECLARE
 BEGIN
 
     -- CATEGORII
-    DBMS_OUTPUT.PUT_LINE('Inserare categorii...');
     FOR i IN 1..l_cat.COUNT LOOP
             v_titlu := l_cat(i);
             INSERT INTO categorii (id, nume)
@@ -397,7 +396,6 @@ BEGIN
         END LOOP;
 
     -- RECENZII_ETICHETE
-    DBMS_OUTPUT.PUT_LINE('Inserare recenzii_etichete...');
     FOR r IN (SELECT id FROM recenzii) LOOP
             FOR i IN 1..2 LOOP
                     BEGIN
@@ -407,10 +405,7 @@ BEGIN
                     END;
                 END LOOP;
         END LOOP;
-    DBMS_OUTPUT.PUT_LINE('Inserare recenzii_etichete... GATA');
-
     -- RECENZII_ACTORI
-    DBMS_OUTPUT.PUT_LINE('Inserare recenzii_actori...');
     FOR r IN (SELECT id, id_film FROM recenzii) LOOP
             FOR a IN (SELECT id_actor FROM distributie WHERE id_film = r.id_film FETCH FIRST 2 ROWS ONLY) LOOP
                     BEGIN

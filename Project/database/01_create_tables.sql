@@ -1,3 +1,14 @@
+/*
+sudo podman run --replace -d --name oracle-xe \
+  -p 1521:1521 \
+  -e ORACLE_PASSWORD=parola \
+  -e APP_USER=movie_user \
+  -e APP_USER_PASSWORD=parola \
+  docker.io/gvenzl/oracle-xe:21-slim
+
+ sudo podman logs -f oracle-xe
+ */
+
 -- Secvente
 CREATE SEQUENCE seq_categorii    START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE;
 CREATE SEQUENCE seq_filme        START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE;
