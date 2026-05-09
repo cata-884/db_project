@@ -11,6 +11,7 @@ import java.util.List;
 @RequestMapping("/api/etichete")
 public class EtichetaController {
 
+    @Autowired
     private EtichetaService etichetaService;
 
     @GetMapping

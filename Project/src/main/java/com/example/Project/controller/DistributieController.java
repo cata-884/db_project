@@ -15,6 +15,7 @@ import java.util.List;
 @RequestMapping("/api/distributie")
 public class DistributieController {
 
+    @Autowired
     private DistributieService distributieService;
 
     @PostMapping

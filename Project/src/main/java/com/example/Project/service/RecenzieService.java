@@ -35,7 +35,7 @@ public class RecenzieService {
             throw new IllegalArgumentException("textComentariu depășește 4000 caractere");
 
         Recenzii recenzie = new Recenzii(null, req.getIdClient(), req.getIdFilm(),
-                req.getNota().byteValue(), null, req.getTextComentariu(), null);
+                req.getNota(), null, req.getTextComentariu(), null);
 
         Long id = recenzieDao.insert(recenzie);
         return recenzieDao.findDetailById(id)

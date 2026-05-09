@@ -2,6 +2,7 @@ package com.example.Project.dao;
 
 import com.example.Project.dto.response.ActorDistributieResponse;
 import com.example.Project.model.actor.Actor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -17,6 +18,7 @@ import java.util.Optional;
 @Repository
 public class ActorDao {
 
+    @Autowired
     private JdbcTemplate jdbcTemplate;
 
     private static final RowMapper<Actor> ROW_MAPPER = (rs, rowNum) -> new Actor(
@@ -32,8 +34,7 @@ public class ActorDao {
             rs.getString("nume_scena"),
             rs.getString("nume"),
             rs.getString("prenume"),
-            rs.getString("rol"),
-            null
+            rs.getString("rol")
     );
 
     public List<Actor> findAll() {

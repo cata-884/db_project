@@ -13,6 +13,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/stats")
 public class StatsController {
+    @Autowired
     private StatsService statsService;
 
     @GetMapping("/recomandari/{idClient}")

@@ -10,5 +10,4 @@ public class CreateDistributieRequest {
     private Long idFilm;
     private Long idActor;
     private RolActor role;
-    private String comentariu;
 }

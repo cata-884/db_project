@@ -9,7 +9,6 @@ import lombok.Data;
 public class MovieVersions {
     private Long id;
     private Long idFilm;
-    private String denumireVersiune;
     private Rezolutie rezolutie;
     private Limbi limbi;
     private Format format;

@@ -11,7 +11,7 @@ public class Recenzii {
     private Long id;
     private Long idClient;
     private Long idFilm;
-    private Byte nota;
+    private Integer nota;
     private String sentiment;
     private String textComentariu;
     private LocalDateTime dataPostare;

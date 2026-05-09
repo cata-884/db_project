@@ -9,5 +9,4 @@ public class Distributie {
     private Long idFilm;
     private Long idActor;
     private RolActor role;
-    private String comentariu;
 }

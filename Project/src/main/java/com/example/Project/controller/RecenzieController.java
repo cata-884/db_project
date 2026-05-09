@@ -16,6 +16,7 @@ import java.util.List;
 @RequestMapping("/api/recenzii")
 public class RecenzieController {
 
+    @Autowired
     private RecenzieService recenzieService;
 
     @GetMapping

@@ -10,23 +10,24 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/recenzii")
+@RequestMapping("/api/recenzii-etichete")
 public class RecenzieEtichetaController {
 
+    @Autowired
     private RecenzieEtichetaService recenzieEtichetaService;
 
-    @PostMapping("/{idRecenzie}/etichete/{idEticheta}")
+    @PostMapping("/{idRecenzie}/{idEticheta}")
     public ResponseEntity<Void> addEticheta(@PathVariable Long idRecenzie, @PathVariable Long idEticheta) {
         recenzieEtichetaService.addEticheta(idRecenzie, idEticheta);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
-    @GetMapping("/{idRecenzie}/etichete")
+    @GetMapping("/{idRecenzie}")
     public List<EtichetaRecord> getEtichete(@PathVariable Long idRecenzie) {
         return recenzieEtichetaService.getEtichete(idRecenzie);
     }
 
-    @DeleteMapping("/{idRecenzie}/etichete/{idEticheta}")
+    @DeleteMapping("/{idRecenzie}/{idEticheta}")
     public ResponseEntity<Void> removeEticheta(@PathVariable Long idRecenzie, @PathVariable Long idEticheta) {
         recenzieEtichetaService.removeEticheta(idRecenzie, idEticheta);
         return ResponseEntity.noContent().build();

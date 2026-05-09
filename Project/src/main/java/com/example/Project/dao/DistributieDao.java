@@ -20,8 +20,7 @@ public class DistributieDao {
     private static final RowMapper<Distributie> ROW_MAPPER = (rs, rowNum) -> new Distributie(
             rs.getLong("id_film"),
             rs.getLong("id_actor"),
-            rs.getString("rol") != null ? RolActor.valueOf(rs.getString("rol")) : null,
-            null
+            rs.getString("rol") != null ? RolActor.valueOf(rs.getString("rol")) : null
     );
 
     private static final RowMapper<ActorDistributieResponse> ACTOR_MAPPER = (rs, rowNum) -> new ActorDistributieResponse(
@@ -29,15 +28,14 @@ public class DistributieDao {
             rs.getString("nume_scena"),
             rs.getString("nume"),
             rs.getString("prenume"),
-            rs.getString("rol"),
-            null
+            rs.getString("rol")
     );
 
     public Distributie insert(CreateDistributieRequest req) {
         jdbcTemplate.update(
                 "INSERT INTO distributie (id_film, id_actor, rol) VALUES (?, ?, ?)",
                 req.getIdFilm(), req.getIdActor(), req.getRole().name());
-        return new Distributie(req.getIdFilm(), req.getIdActor(), req.getRole(), req.getComentariu());
+        return new Distributie(req.getIdFilm(), req.getIdActor(), req.getRole());
     }
 
     public List<ActorDistributieResponse> findActoriByFilmId(Long idFilm) {

@@ -14,6 +14,7 @@ import java.util.List;
 @RequestMapping("/api/actori")
 public class ActorController {
 
+    @Autowired
     private ActorService actorService;
 
     @GetMapping

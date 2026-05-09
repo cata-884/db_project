@@ -15,6 +15,7 @@ import java.util.List;
 @RequestMapping("/api/vizualizari")
 public class VizualizareController {
 
+    @Autowired
     private VizualizareService vizualizareService;
 
     @GetMapping

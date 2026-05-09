@@ -11,5 +11,4 @@ public class ActorDistributieResponse {
     private String nume;
     private String prenume;
     private String rol;
-    private String comentariu;
 }

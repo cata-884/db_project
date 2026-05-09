@@ -3,6 +3,7 @@ package com.example.Project.dao;
 import com.example.Project.model.client.Client;
 import com.example.Project.model.client.CountryCode;
 import com.example.Project.model.client.PhoneNumber;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
@@ -14,6 +15,7 @@ import java.util.Optional;
 @Repository
 public class AuthDao {
 
+    @Autowired
     private JdbcTemplate jdbcTemplate;
 
     private static final RowMapper<Client> CLIENT_MAPPER = (rs, rowNum) -> {
