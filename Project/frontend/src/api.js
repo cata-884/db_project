@@ -40,6 +40,8 @@ export const api = {
   getRecenziiFilm: (idFilm) => request(`/api/recenzii/film/${idFilm}`),
   postRecenzie: (data) =>
     request('/api/recenzii', { method: 'POST', body: JSON.stringify(data) }),
+  updateRecenzie: (id, data) =>
+    request(`/api/recenzii/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
   getEtichete: () => request('/api/etichete'),
   addEticheta: (idRecenzie, idEticheta) =>
     request(`/api/recenzii-etichete/${idRecenzie}/${idEticheta}`, { method: 'POST' }),

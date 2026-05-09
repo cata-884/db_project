@@ -170,6 +170,115 @@ END p_clienti_similari;
 SHOW ERRORS;
 
 
+-- p_predictii_sezoniere
+-- Calculeaza un scor de predictie per film pentru luna data,
+-- pe baza unui indice sezonier (avg vizionari in luna / avg vizionari annual)
+-- aplicat peste rating-ul filmului.
+CREATE OR REPLACE PROCEDURE p_predictii_sezoniere(
+    p_luna     IN  NUMBER,
+    p_top_n    IN  NUMBER DEFAULT 10,
+    p_rezultat OUT SYS_REFCURSOR
+)
+IS
+BEGIN
+    OPEN p_rezultat FOR
+        WITH viz_pe_luna AS (
+            SELECT EXTRACT(MONTH FROM v.data_vizualizare) AS luna,
+                   f.id_categorie,
+                   COUNT(*) AS nr
+              FROM vizualizari v
+              JOIN versiuni_film vf ON v.id_versiune = vf.id
+              JOIN filme f          ON vf.id_film = f.id
+             WHERE v.data_vizualizare IS NOT NULL
+             GROUP BY EXTRACT(MONTH FROM v.data_vizualizare), f.id_categorie
+        ),
+        medii AS (
+            SELECT id_categorie, AVG(nr) AS media_lunara
+              FROM viz_pe_luna
+             GROUP BY id_categorie
+        ),
+        seasonal_index AS (
+            SELECT v.luna,
+                   v.id_categorie,
+                   v.nr / NULLIF(m.media_lunara, 0) AS idx
+              FROM viz_pe_luna v
+              JOIN medii m ON v.id_categorie = m.id_categorie
+        )
+        SELECT f.id,
+               f.titlu,
+               c.nume AS categorie,
+               f.rating,
+               ROUND(si.idx, 2) AS factor_sezonier,
+               ROUND(f.rating * si.idx, 2) AS scor_predictie
+          FROM filme f
+          JOIN categorii c ON f.id_categorie = c.id
+          JOIN seasonal_index si ON f.id_categorie = si.id_categorie
+         WHERE si.luna = p_luna
+           AND f.rating IS NOT NULL
+         ORDER BY scor_predictie DESC
+         FETCH FIRST p_top_n ROWS ONLY;
+END p_predictii_sezoniere;
+/
+SHOW ERRORS;
+
+
+-- p_grupare_clienti
+-- Realizeaza o grupare threshold-based a clientilor pe baza similaritatii
+-- calculata cu f_calcul_similaritate_clienti (single-link clustering).
+-- Clientii cu similaritate >= p_threshold fata de liderul grupei
+-- sunt asignati aceleiasi grupe.
+CREATE OR REPLACE PROCEDURE p_grupare_clienti(
+    p_threshold IN  NUMBER DEFAULT 0.3,
+    p_rezultat  OUT SYS_REFCURSOR
+)
+IS
+    TYPE t_ids IS TABLE OF NUMBER;
+    v_clienti       t_ids;
+    v_grupe         t_ids := t_ids();
+    v_grupa_curenta NUMBER := 0;
+    v_sim           NUMBER;
+BEGIN
+    SELECT id BULK COLLECT INTO v_clienti FROM clienti ORDER BY id;
+    v_grupe.EXTEND(v_clienti.COUNT);
+
+    FOR i IN 1 .. v_clienti.COUNT LOOP
+        v_grupe(i) := -1;
+    END LOOP;
+
+    FOR i IN 1 .. v_clienti.COUNT LOOP
+        IF v_grupe(i) = -1 THEN
+            v_grupa_curenta := v_grupa_curenta + 1;
+            v_grupe(i) := v_grupa_curenta;
+
+            FOR j IN i+1 .. v_clienti.COUNT LOOP
+                IF v_grupe(j) = -1 THEN
+                    v_sim := f_calcul_similaritate_clienti(v_clienti(i), v_clienti(j));
+                    IF v_sim >= p_threshold THEN
+                        v_grupe(j) := v_grupa_curenta;
+                    END IF;
+                END IF;
+            END LOOP;
+        END IF;
+    END LOOP;
+
+    DELETE FROM tmp_grupare_clienti;
+    FOR i IN 1 .. v_clienti.COUNT LOOP
+        INSERT INTO tmp_grupare_clienti (id_client, id_grupa)
+        VALUES (v_clienti(i), v_grupe(i));
+    END LOOP;
+
+    OPEN p_rezultat FOR
+        SELECT g.id_grupa,
+               c.id   AS id_client,
+               c.nume || ' ' || c.prenume AS nume_complet
+          FROM tmp_grupare_clienti g
+          JOIN clienti c ON g.id_client = c.id
+         ORDER BY g.id_grupa, c.id;
+END p_grupare_clienti;
+/
+SHOW ERRORS;
+
+
 -- Exemple de utilizare din SQL*Plus
 -- VARIABLE rc REFCURSOR;
 -- EXEC p_recomandari_pentru_client(1, :rc);

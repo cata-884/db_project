@@ -2,6 +2,8 @@ package com.example.Project.controller;
 
 import com.example.Project.dto.response.AnalizaSezonierResponse;
 import com.example.Project.dto.response.ClientSimilarResponse;
+import com.example.Project.dto.response.GrupareClientiResponse;
+import com.example.Project.dto.response.PredictieSezoneraResponse;
 import com.example.Project.dto.response.ProfilCinematograficResponse;
 import com.example.Project.dto.response.RecomandareResponse;
 import com.example.Project.service.StatsService;
@@ -36,5 +38,18 @@ public class StatsController {
             @PathVariable Long idClient,
             @RequestParam(defaultValue = "5") int topN) {
         return statsService.getClientiSimilari(idClient, topN);
+    }
+
+    @GetMapping("/predictii")
+    public List<PredictieSezoneraResponse> getPredictiiSezoniere(
+            @RequestParam int luna,
+            @RequestParam(defaultValue = "10") int topN) {
+        return statsService.getPredictiiSezoniere(luna, topN);
+    }
+
+    @GetMapping("/grupare")
+    public List<GrupareClientiResponse> getGrupareClienti(
+            @RequestParam(defaultValue = "0.3") double threshold) {
+        return statsService.getGrupareClienti(threshold);
     }
 }

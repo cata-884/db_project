@@ -19,6 +19,8 @@ public class MovieDao {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
+    // NOTA: la orice ORDER BY pe rating sau alte coloane nullable, foloseste NULLS LAST
+    //       in Oracle DESC pune NULL-urile primele, ceea ce nu e ce vrem
     private static final RowMapper<Movie> ROW_MAPPER = (rs, rowNum) -> new Movie(
             rs.getLong("id"),
             rs.getString("titlu"),

@@ -2,9 +2,9 @@ import { useEffect, useState } from 'react';
 import { api } from '../api.js';
 import EticheteSelector from './EticheteSelector.jsx';
 
-function ReviewForm({ idFilm, idClient, onSubmitted }) {
-  const [nota, setNota] = useState(8);
-  const [textComentariu, setTextComentariu] = useState('');
+function ReviewForm({ idFilm, idClient, existingReview, onSubmitted }) {
+  const [nota, setNota] = useState(existingReview?.nota ?? 8);
+  const [textComentariu, setTextComentariu] = useState(existingReview?.textComentariu ?? '');
   const [etichete, setEtichete] = useState([]);
   const [selected, setSelected] = useState(new Set());
   const [loading, setLoading] = useState(false);
@@ -37,16 +37,21 @@ function ReviewForm({ idFilm, idClient, onSubmitted }) {
     setError('');
     setLoading(true);
     try {
-      const recenzie = await api.postRecenzie({
-        idClient,
-        idFilm,
-        nota: Number(nota),
-        textComentariu
-      });
+      let recenzie;
+      if (existingReview?.id) {
+        recenzie = await api.updateRecenzie(existingReview.id, {
+          nota: Number(nota),
+          textComentariu
+        });
+      } else {
+        recenzie = await api.postRecenzie({ idClient, idFilm, nota: Number(nota), textComentariu });
+      }
 
       const idRecenzie = recenzie?.id || recenzie?.idRecenzie;
-      for (const idEticheta of selected) {
-        await api.addEticheta(idRecenzie, idEticheta);
+      if (idRecenzie && !existingReview?.id) {
+        for (const idEticheta of selected) {
+          await api.addEticheta(idRecenzie, idEticheta);
+        }
       }
       setTextComentariu('');
       setSelected(new Set());
@@ -64,9 +69,11 @@ function ReviewForm({ idFilm, idClient, onSubmitted }) {
     }
   };
 
+  const isEditMode = !!existingReview?.id;
+
   return (
     <form onSubmit={handleSubmit} className="card card-body">
-      <h5 className="mb-3">Adauga o recenzie</h5>
+      <h5 className="mb-3">{isEditMode ? 'Editeaza recenzia' : 'Adauga o recenzie'}</h5>
       {error && <div className="alert alert-danger">{error}</div>}
       <div className="mb-3">
         <label className="form-label">Nota (1-10)</label>
@@ -89,17 +96,18 @@ function ReviewForm({ idFilm, idClient, onSubmitted }) {
         />
       </div>
 
-      <div className="mb-3">
-        <label className="form-label">Etichete</label>
-        <EticheteSelector etichete={etichete} selected={selected} onToggle={toggle} />
-      </div>
+      {!isEditMode && (
+        <div className="mb-3">
+          <label className="form-label">Etichete</label>
+          <EticheteSelector etichete={etichete} selected={selected} onToggle={toggle} />
+        </div>
+      )}
 
       <button className="btn btn-primary" type="submit" disabled={loading}>
-        {loading ? 'Se posteaza...' : 'Posteaza'}
+        {loading ? 'Se salveaza...' : isEditMode ? 'Actualizeaza' : 'Posteaza'}
       </button>
     </form>
   );
 }
 
 export default ReviewForm;
-

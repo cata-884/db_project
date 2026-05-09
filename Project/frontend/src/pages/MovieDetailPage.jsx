@@ -105,6 +105,7 @@ function MovieDetailPage() {
           <ReviewForm
             idFilm={movie.id}
             idClient={user.id}
+            existingReview={reviews.find((r) => r.idClient === user.id || r.id_client === user.id) ?? null}
             onSubmitted={loadAll}
           />
         )}

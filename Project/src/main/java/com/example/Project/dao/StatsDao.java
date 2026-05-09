@@ -2,6 +2,8 @@ package com.example.Project.dao;
 
 import com.example.Project.dto.response.AnalizaSezonierResponse;
 import com.example.Project.dto.response.ClientSimilarResponse;
+import com.example.Project.dto.response.GrupareClientiResponse;
+import com.example.Project.dto.response.PredictieSezoneraResponse;
 import com.example.Project.dto.response.ProfilCinematograficResponse;
 import com.example.Project.dto.response.RecomandareResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -112,6 +114,52 @@ public class StatsDao {
                             rs.getLong("id"),
                             rs.getString("nume_complet"),
                             rs.getDouble("scor_similaritate")
+                    ));
+                }
+            }
+            return result;
+        };
+        return jdbcTemplate.execute(creator, callback);
+    }
+
+    public List<PredictieSezoneraResponse> predictiiSezoniere(int luna, int topN) {
+        CallableStatementCreator creator = con -> con.prepareCall("{call p_predictii_sezoniere(?, ?, ?)}");
+        CallableStatementCallback<List<PredictieSezoneraResponse>> callback = cs -> {
+            cs.setInt(1, luna);
+            cs.setInt(2, topN);
+            cs.registerOutParameter(3, CURSOR);
+            cs.execute();
+            List<PredictieSezoneraResponse> result = new ArrayList<>();
+            try (ResultSet rs = (ResultSet) cs.getObject(3)) {
+                while (rs.next()) {
+                    result.add(new PredictieSezoneraResponse(
+                            rs.getLong("id"),
+                            rs.getString("titlu"),
+                            rs.getString("categorie"),
+                            rs.getDouble("rating"),
+                            rs.getDouble("factor_sezonier"),
+                            rs.getDouble("scor_predictie")
+                    ));
+                }
+            }
+            return result;
+        };
+        return jdbcTemplate.execute(creator, callback);
+    }
+
+    public List<GrupareClientiResponse> grupareClienti(double threshold) {
+        CallableStatementCreator creator = con -> con.prepareCall("{call p_grupare_clienti(?, ?)}");
+        CallableStatementCallback<List<GrupareClientiResponse>> callback = cs -> {
+            cs.setDouble(1, threshold);
+            cs.registerOutParameter(2, CURSOR);
+            cs.execute();
+            List<GrupareClientiResponse> result = new ArrayList<>();
+            try (ResultSet rs = (ResultSet) cs.getObject(2)) {
+                while (rs.next()) {
+                    result.add(new GrupareClientiResponse(
+                            rs.getLong("id_grupa"),
+                            rs.getLong("id_client"),
+                            rs.getString("nume_complet")
                     ));
                 }
             }

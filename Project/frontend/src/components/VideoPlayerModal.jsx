@@ -7,6 +7,7 @@ const SIM_DURATION_SECONDS = SIM_DURATION_MINUTES * 60;
 const SPEED_SECONDS_PER_TICK = 30;
 const TICK_MS = 1000;
 const SKIP_PERCENT = 10;
+const MIN_UPDATE_INTERVAL_MS = 5000;
 
 function formatTimeFromPercent(percent) {
   const total = SIM_DURATION_SECONDS;
@@ -31,6 +32,7 @@ function VideoPlayerModal({ movie, idClient, idVersiune, onClose }) {
   const intervalRef = useRef(null);
   const barRef = useRef(null);
   const initRef = useRef(false);
+  const lastUpdateRef = useRef(0);
   const latestStateRef = useRef({
     stare: 'IN_PROGRESS',
     durataMinute: 0,
@@ -82,10 +84,17 @@ function VideoPlayerModal({ movie, idClient, idVersiune, onClose }) {
         durata: durataValue,
         stare: status
       });
+      lastUpdateRef.current = Date.now();
       setLastSyncAt(Date.now());
     } catch (err) {
       setError(err.message || 'Eroare la actualizare.');
     }
+  };
+
+  const updateVizualizareThrottled = async (status, durataValue, force = false) => {
+    const now = Date.now();
+    if (!force && now - lastUpdateRef.current < MIN_UPDATE_INTERVAL_MS) return;
+    await updateVizualizare(status, durataValue);
   };
 
   useEffect(() => {
@@ -180,7 +189,7 @@ function VideoPlayerModal({ movie, idClient, idVersiune, onClose }) {
     if (!idVizualizare) return;
     const next = calcPercentFromClientX(e.clientX);
     setProgress(next);
-    updateVizualizare(stare, Math.round((next / 100) * SIM_DURATION_MINUTES));
+    updateVizualizareThrottled(stare, Math.round((next / 100) * SIM_DURATION_MINUTES));
   };
 
   const handleMouseMove = (e) => {
@@ -208,7 +217,7 @@ function VideoPlayerModal({ movie, idClient, idVersiune, onClose }) {
     const shouldResume = wasPlayingBeforeDrag && progress < 100;
     setIsPlaying(shouldResume);
     setStare(progress >= 100 ? 'COMPLETED' : shouldResume ? 'IN_PROGRESS' : 'PAUSED');
-    await updateVizualizare(shouldResume ? 'IN_PROGRESS' : 'PAUSED', durataMinute);
+    await updateVizualizareThrottled(shouldResume ? 'IN_PROGRESS' : 'PAUSED', durataMinute);
   };
 
   useEffect(() => {

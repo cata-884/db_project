@@ -113,3 +113,10 @@ CREATE TABLE recenzii_actori (
     comentariu      VARCHAR2(1000),
     CONSTRAINT pk_recenzii_actori PRIMARY KEY (id_recenzie, id_actor)
 );
+
+-- Tabela temporara folosita de p_grupare_clienti pentru a returna rezultatele
+-- prin refcursor. ON COMMIT PRESERVE ROWS pastreaza datele pana la sfarsitul sesiunii.
+CREATE GLOBAL TEMPORARY TABLE tmp_grupare_clienti (
+    id_client NUMBER NOT NULL,
+    id_grupa  NUMBER NOT NULL
+) ON COMMIT PRESERVE ROWS;
