@@ -5,7 +5,6 @@ import { auth } from '../auth.js';
 import ReviewList from '../components/ReviewList.jsx';
 import ReviewForm from '../components/ReviewForm.jsx';
 import VideoPlayerModal from '../components/VideoPlayerModal.jsx';
-import MoviePoster from '../components/MoviePoster.jsx';
 
 function MovieDetailPage() {
   const { id } = useParams();
@@ -13,6 +12,7 @@ function MovieDetailPage() {
   const [movie, setMovie] = useState(null);
   const [actors, setActors] = useState([]);
   const [reviews, setReviews] = useState([]);
+  const [categorii, setCategorii] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [showPlayer, setShowPlayer] = useState(false);
@@ -21,14 +21,16 @@ function MovieDetailPage() {
     setLoading(true);
     setError('');
     try {
-      const [movieData, actorData, reviewData] = await Promise.all([
+      const [movieData, actorData, reviewData, categoriiData] = await Promise.all([
         api.getFilm(id),
         api.getActoriFilm(id),
-        api.getRecenziiFilm(id)
+        api.getRecenziiFilm(id),
+        api.getCategorii()
       ]);
       setMovie(movieData);
       setActors(actorData || []);
       setReviews(reviewData || []);
+      setCategorii(categoriiData || []);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -49,6 +51,8 @@ function MovieDetailPage() {
   if (error) return <div className="alert alert-danger">{error}</div>;
   if (!movie) return <div className="text-muted">Film inexistent.</div>;
 
+  const categorieName = categorii.find((c) => c.id === (movie.idCategorie || movie.id_categorie))?.nume;
+
   return (
     <div className="row g-4">
       <div className="col-lg-8">
@@ -58,7 +62,7 @@ function MovieDetailPage() {
           <div className="d-flex gap-3 flex-wrap">
             <span>⭐ {movie.rating?.toFixed?.(1) || movie.rating || 'N/A'}</span>
             <span>Data lansare: {movie.dataLansare || movie.data_lansare || '-'}</span>
-            <span>Categorie: {movie.idCategorie || movie.id_categorie || '-'}</span>
+            <span>Categorie: {categorieName || '-'}</span>
           </div>
           {user && (
             <button className="btn btn-success mt-3" onClick={handleVizionare}>
@@ -100,20 +104,10 @@ function MovieDetailPage() {
       </div>
 
       <div className="col-lg-4">
-        <div className="card card-body mb-3">
-          <MoviePoster movie={movie} height={260} />
-          <button
-            className="btn btn-primary w-100 mt-3"
-            onClick={handleVizionare}
-            disabled={!user}
-          >
-            {user ? 'Vizioneaza (simulat)' : 'Autentifica-te pentru a viziona'}
-          </button>
-        </div>
         <div className="card card-body">
           <h6>Detalii rapide</h6>
           <div className="small text-muted">
-            Autentificarea foloseste localStorage. Vizionarea este simulata.
+            Autentificarea foloseste localStorage.
           </div>
         </div>
       </div>

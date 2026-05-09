@@ -15,7 +15,9 @@ async function request(path, options = {}) {
     } catch {
       if (text) message = text;
     }
-    throw new Error(message);
+    const err = new Error(message);
+    err.status = res.status;
+    throw err;
   }
 
   if (res.status === 204) return null;
@@ -54,5 +56,6 @@ export const api = {
     request(`/api/stats/similari/${idClient}?topN=${topN}`),
   getActoriFilm: (idFilm) => request(`/api/actori/film/${idFilm}`)
 };
+
 
 

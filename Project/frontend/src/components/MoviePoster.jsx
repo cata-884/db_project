@@ -9,10 +9,9 @@ function MoviePoster({ movie, height = 220 }) {
       style={{ height, background: gradient }}
       aria-label={`Poster ${movie?.titlu || ''}`}
     >
-      <div className="movie-poster-title">🎬 {movie?.titlu}</div>
+      <div className="movie-poster-title">{movie?.titlu}</div>
     </div>
   );
 }
 
 export default MoviePoster;
-

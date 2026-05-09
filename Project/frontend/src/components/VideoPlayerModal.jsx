@@ -30,6 +30,12 @@ function VideoPlayerModal({ movie, idClient, onClose }) {
   const [nowTs, setNowTs] = useState(Date.now());
   const intervalRef = useRef(null);
   const barRef = useRef(null);
+  const initRef = useRef(false);
+  const latestStateRef = useRef({
+    stare: 'IN_PROGRESS',
+    durataMinute: 0,
+    idVizualizare: null
+  });
 
   const durataMinute = useMemo(() => Math.round((progress / 100) * SIM_DURATION_MINUTES), [progress]);
 
@@ -47,6 +53,8 @@ function VideoPlayerModal({ movie, idClient, onClose }) {
   }, []);
 
   const saveInitial = async () => {
+    if (initRef.current) return;
+    initRef.current = true;
     try {
       const res = await api.postVizualizare({
         idClient,
@@ -56,6 +64,7 @@ function VideoPlayerModal({ movie, idClient, onClose }) {
       });
       const vizId = res?.id || res?.idVizualizare || res?.id_vizualizare;
       setIdVizualizare(vizId || null);
+      latestStateRef.current.idVizualizare = vizId || null;
       setLastSyncAt(Date.now());
     } catch (err) {
       setError(err.message || 'Eroare la inregistrare.');
@@ -81,6 +90,14 @@ function VideoPlayerModal({ movie, idClient, onClose }) {
   useEffect(() => {
     saveInitial();
   }, []);
+
+  useEffect(() => {
+    latestStateRef.current = {
+      stare,
+      durataMinute,
+      idVizualizare
+    };
+  }, [stare, durataMinute, idVizualizare]);
 
   useEffect(() => {
     if (!isPlaying || isDragging || stare === 'COMPLETED') {
@@ -113,11 +130,12 @@ function VideoPlayerModal({ movie, idClient, onClose }) {
 
   useEffect(() => {
     return () => {
-      if (stare !== 'COMPLETED') {
-        updateVizualizare('ABANDONED', durataMinute);
+      const latest = latestStateRef.current;
+      if (latest.stare !== 'COMPLETED' && latest.idVizualizare) {
+        updateVizualizare('ABANDONED', latest.durataMinute);
       }
     };
-  }, [stare, durataMinute, idVizualizare]);
+  }, []);
 
   const togglePlayPause = async () => {
     if (stare === 'COMPLETED') return;
@@ -158,6 +176,7 @@ function VideoPlayerModal({ movie, idClient, onClose }) {
   };
 
   const handleBarClick = (e) => {
+    if (!idVizualizare) return;
     const next = calcPercentFromClientX(e.clientX);
     setProgress(next);
     updateVizualizare(stare, Math.round((next / 100) * SIM_DURATION_MINUTES));
@@ -173,6 +192,7 @@ function VideoPlayerModal({ movie, idClient, onClose }) {
   const handleMouseLeave = () => setHoverPercent(null);
 
   const handleDragStart = (e) => {
+    if (!idVizualizare) return;
     setWasPlayingBeforeDrag(isPlaying);
     setIsDragging(true);
     setIsPlaying(false);
@@ -203,6 +223,7 @@ function VideoPlayerModal({ movie, idClient, onClose }) {
   }, [isDragging, progress, wasPlayingBeforeDrag]);
 
   const displayTime = `${formatTimeFromPercent(progress)} / ${formatTimeFromPercent(100)}`;
+  const controlsDisabled = !idVizualizare;
 
   return createPortal(
     <div className="modal fade show d-block" tabIndex="-1" role="dialog">
@@ -216,21 +237,33 @@ function VideoPlayerModal({ movie, idClient, onClose }) {
             <div className="fake-player">
               <div className="fake-poster">
                 <div className="fake-poster-title">{movie.titlu}</div>
-                <div className="play-pulse">▶</div>
+                <div className="play-pulse">PLAY</div>
               </div>
               <div className="player-controls">
-                <button className="btn btn-light btn-sm" onClick={() => skipByPercent(-SKIP_PERCENT)}>
-                  ⏮
+                <button
+                  className="btn btn-light btn-sm"
+                  onClick={() => skipByPercent(-SKIP_PERCENT)}
+                  disabled={controlsDisabled}
+                >
+                  Back
                 </button>
-                <button className="btn btn-light btn-sm" onClick={togglePlayPause}>
-                  {isPlaying ? '⏸' : '▶'}
+                <button className="btn btn-light btn-sm" onClick={togglePlayPause} disabled={controlsDisabled}>
+                  {isPlaying ? 'Pause' : 'Play'}
                 </button>
-                <button className="btn btn-light btn-sm" onClick={() => skipByPercent(SKIP_PERCENT)}>
-                  ⏭
+                <button
+                  className="btn btn-light btn-sm"
+                  onClick={() => skipByPercent(SKIP_PERCENT)}
+                  disabled={controlsDisabled}
+                >
+                  Forward
                 </button>
                 <div className="player-time">{displayTime}</div>
-                <button className="btn btn-light btn-sm" onClick={() => setIsFullscreen((v) => !v)}>
-                  ⛶
+                <button
+                  className="btn btn-light btn-sm"
+                  onClick={() => setIsFullscreen((v) => !v)}
+                  disabled={controlsDisabled}
+                >
+                  Full
                 </button>
               </div>
               <div
@@ -262,6 +295,9 @@ function VideoPlayerModal({ movie, idClient, onClose }) {
                 <span>Stare: {stare}</span>
                 <span>• Inregistrare: live BD</span>
               </div>
+              {controlsDisabled && (
+                <div className="text-muted small mt-2">Se initializeaza vizionarea...</div>
+              )}
             </div>
             <div className="player-debug-panel">
               <div>ID Vizualizare: {idVizualizare || '-'}</div>

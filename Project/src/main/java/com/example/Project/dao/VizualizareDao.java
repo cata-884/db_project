@@ -83,7 +83,8 @@ public class VizualizareDao {
 
     public int update(Long id, Vizualizari viz) {
         return jdbcTemplate.update(
-                "UPDATE vizualizari SET data_vizualizare = ?, durata = ?, stare = ? WHERE id = ?",
+                "UPDATE vizualizari SET data_vizualizare = COALESCE(?, data_vizualizare), " +
+                "durata = COALESCE(?, durata), stare = COALESCE(?, stare) WHERE id = ?",
                 viz.getDataVizualizare() != null ? Date.valueOf(viz.getDataVizualizare()) : null,
                 viz.getDurata(),
                 viz.getStare() != null ? viz.getStare().name() : null,

@@ -53,7 +53,8 @@ function ReviewForm({ idFilm, idClient, onSubmitted }) {
       if (onSubmitted) onSubmitted();
     } catch (err) {
       const message = err.message || 'Eroare la trimiterea recenziei.';
-      if (message.includes('409') || message.toLowerCase().includes('deja')) {
+      const lower = message.toLowerCase();
+      if (err.status === 409 || lower.includes('ora-00001') || lower.includes('duplicat')) {
         setError('Ai recenzat deja acest film.');
       } else {
         setError(message);
@@ -101,3 +102,4 @@ function ReviewForm({ idFilm, idClient, onSubmitted }) {
 }
 
 export default ReviewForm;
+

@@ -1,12 +1,6 @@
-import MoviePoster from './MoviePoster';
-
 function MovieCard({ movie, onClick }) {
   return (
     <div className="card h-100" style={{ cursor: 'pointer' }} onClick={onClick}>
-      {/* Add a compact poster placeholder */}
-      <div className="card-img-top">
-        <MoviePoster movie={movie} height={160} />
-      </div>
       <div className="card-body">
         <h5 className="card-title">{movie.titlu}</h5>
         <p className="card-text small text-muted">

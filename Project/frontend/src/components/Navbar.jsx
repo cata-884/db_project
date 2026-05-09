@@ -14,7 +14,7 @@ function Navbar() {
     <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
       <div className="container">
         <Link className="navbar-brand" to="/movies">
-          🎬 MovieApp
+          MovieApp
         </Link>
         <div className="collapse navbar-collapse show">
           <ul className="navbar-nav me-auto mb-2 mb-lg-0">

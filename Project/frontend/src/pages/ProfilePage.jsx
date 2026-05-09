@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { api } from '../api.js';
 import { auth } from '../auth.js';
 import MovieCard from '../components/MovieCard.jsx';
 
 function ProfilePage() {
   const user = auth.get();
+  const navigate = useNavigate();
   const [profil, setProfil] = useState(null);
   const [recomandari, setRecomandari] = useState([]);
   const [istoric, setIstoric] = useState([]);
@@ -82,7 +84,10 @@ function ProfilePage() {
             <div className="row g-3">
               {recomandari.slice(0, 10).map((movie) => (
                 <div key={movie.id || movie.id_film} className="col-md-6">
-                  <MovieCard movie={movie} onClick={() => {}} />
+                  <MovieCard
+                    movie={movie}
+                    onClick={() => navigate(`/movies/${movie.id || movie.id_film}`)}
+                  />
                 </div>
               ))}
             </div>
