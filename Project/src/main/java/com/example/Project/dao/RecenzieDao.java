@@ -99,7 +99,7 @@ public class RecenzieDao {
 
     public int update(Long id, UpdateRecenzieRequest req) {
         return jdbcTemplate.update(
-                "UPDATE recenzii SET nota = ?, text_comentariu = ? WHERE id = ?",
+                "UPDATE recenzii SET nota = NVL(?, nota), text_comentariu = NVL(?, text_comentariu) WHERE id = ?",
                 req.getNota(), req.getTextComentariu(), id);
     }
 

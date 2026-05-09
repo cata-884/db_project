@@ -65,7 +65,9 @@ public class MovieDao {
 
     public int update(Long id, Movie movie) {
         return jdbcTemplate.update(
-                "UPDATE filme SET titlu = ?, descriere = ?, data_lansare = ?, id_categorie = ?, rating = ? WHERE id = ?",
+                "UPDATE filme SET titlu = NVL(?, titlu), descriere = NVL(?, descriere), " +
+                "data_lansare = NVL(?, data_lansare), id_categorie = NVL(?, id_categorie), " +
+                "rating = NVL(?, rating) WHERE id = ?",
                 movie.getTitlu(),
                 movie.getDescriere(),
                 movie.getDataLansare() != null ? Date.valueOf(movie.getDataLansare()) : null,

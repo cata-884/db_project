@@ -34,18 +34,28 @@ IS
     FUNCTION numara_aparitii(p_haystack VARCHAR2, p_needle VARCHAR2)
         RETURN NUMBER
     IS
-BEGIN
+        v_count NUMBER := 0;
+        v_pos NUMBER := 1;
+        v_find VARCHAR2(200);
+    BEGIN
         IF p_haystack IS NULL OR p_needle IS NULL THEN
             RETURN 0;
         END IF;
-        RETURN (LENGTH(p_haystack) - LENGTH(REPLACE(p_haystack, p_needle))) / LENGTH(p_needle);
-END;
+        v_find := ' ' || p_needle || ' ';
+        LOOP
+            v_pos := INSTR(p_haystack, v_find, v_pos);
+            EXIT WHEN v_pos = 0;
+            v_count := v_count + 1;
+            v_pos := v_pos + LENGTH(v_find);
+        END LOOP;
+        RETURN v_count;
+    END;
 BEGIN
     IF p_text IS NULL OR LENGTH(TRIM(p_text)) = 0 THEN
         RETURN 'NEUTRU';
 END IF;
 
-    v_text := LOWER(p_text);
+    v_text := ' ' || LOWER(p_text) || ' ';
 
 FOR i IN 1 .. cuv_poz.COUNT LOOP
         v_scor_pozitiv := v_scor_pozitiv + numara_aparitii(v_text, cuv_poz(i));

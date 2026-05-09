@@ -262,7 +262,7 @@ BEGIN
         END LOOP;
 
     FOR i IN 1..25 LOOP
-            SELECT id INTO v_id_1 FROM (SELECT id FROM filme ORDER BY DBMS_RANDOM.VALUE()) WHERE ROWNUM = 1;
+            SELECT id INTO v_id_1 FROM (SELECT id FROM filme ORDER BY DBMS_RANDOM.VALUE()) FETCH FIRST 1 ROW ONLY;
             INSERT INTO versiuni_film (id, id_film, rezolutie, limbi, format)
             VALUES (
                        seq_versiuni.NEXTVAL,

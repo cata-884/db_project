@@ -67,7 +67,8 @@ public class ActorDao {
 
     public int update(Long id, Actor actor) {
         return jdbcTemplate.update(
-                "UPDATE actori SET nume_scena = ?, nume = ?, prenume = ?, data_nastere = ? WHERE id = ?",
+                "UPDATE actori SET nume_scena = NVL(?, nume_scena), nume = NVL(?, nume), " +
+                "prenume = NVL(?, prenume), data_nastere = NVL(?, data_nastere) WHERE id = ?",
                 actor.getNumeScena(),
                 actor.getNume(),
                 actor.getPrenume(),

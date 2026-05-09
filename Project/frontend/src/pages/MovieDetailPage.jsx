@@ -13,6 +13,7 @@ function MovieDetailPage() {
   const [actors, setActors] = useState([]);
   const [reviews, setReviews] = useState([]);
   const [categorii, setCategorii] = useState([]);
+  const [versiuni, setVersiuni] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [showPlayer, setShowPlayer] = useState(false);
@@ -21,16 +22,18 @@ function MovieDetailPage() {
     setLoading(true);
     setError('');
     try {
-      const [movieData, actorData, reviewData, categoriiData] = await Promise.all([
+      const [movieData, actorData, reviewData, categoriiData, versiuniData] = await Promise.all([
         api.getFilm(id),
         api.getActoriFilm(id),
         api.getRecenziiFilm(id),
-        api.getCategorii()
+        api.getCategorii(),
+        api.getVersiuniFilm(id)
       ]);
       setMovie(movieData);
       setActors(actorData || []);
       setReviews(reviewData || []);
       setCategorii(categoriiData || []);
+      setVersiuni(versiuniData || []);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -43,7 +46,7 @@ function MovieDetailPage() {
   }, [id]);
 
   const handleVizionare = () => {
-    if (!user) return;
+    if (!user || !versiuni[0]?.id) return;
     setShowPlayer(true);
   };
 
@@ -52,6 +55,7 @@ function MovieDetailPage() {
   if (!movie) return <div className="text-muted">Film inexistent.</div>;
 
   const categorieName = categorii.find((c) => c.id === (movie.idCategorie || movie.id_categorie))?.nume;
+  const idVersiune = versiuni[0]?.id;
 
   return (
     <div className="row g-4">
@@ -65,9 +69,12 @@ function MovieDetailPage() {
             <span>Categorie: {categorieName || '-'}</span>
           </div>
           {user && (
-            <button className="btn btn-success mt-3" onClick={handleVizionare}>
+            <button className="btn btn-success mt-3" onClick={handleVizionare} disabled={!idVersiune}>
               Vizioneaza
             </button>
+          )}
+          {user && !idVersiune && (
+            <div className="text-muted small mt-2">Nu exista versiuni pentru acest film.</div>
           )}
         </div>
 
@@ -116,6 +123,7 @@ function MovieDetailPage() {
         <VideoPlayerModal
           movie={movie}
           idClient={user.id}
+          idVersiune={idVersiune}
           onClose={() => setShowPlayer(false)}
         />
       )}

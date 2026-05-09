@@ -46,7 +46,7 @@ public class CategorieDao {
 
     public int update(Long id, Categorie categorie) {
         return jdbcTemplate.update(
-                "UPDATE categorii SET nume = ? WHERE id = ?",
+                "UPDATE categorii SET nume = NVL(?, nume) WHERE id = ?",
                 categorie.getNume(), id);
     }
 

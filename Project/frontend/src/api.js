@@ -36,6 +36,7 @@ export const api = {
   getFilmeByCategorie: (idCategorie) => request(`/api/filme/categorie/${idCategorie}`),
   getFilm: (id) => request(`/api/filme/${id}`),
   getCategorii: () => request('/api/categorii'),
+  getVersiuniFilm: (idFilm) => request(`/api/versiuni-film/film/${idFilm}`),
   getRecenziiFilm: (idFilm) => request(`/api/recenzii/film/${idFilm}`),
   postRecenzie: (data) =>
     request('/api/recenzii', { method: 'POST', body: JSON.stringify(data) }),

@@ -16,7 +16,7 @@ function formatTimeFromPercent(percent) {
   return `${min}:${sec.toString().padStart(2, '0')}`;
 }
 
-function VideoPlayerModal({ movie, idClient, onClose }) {
+function VideoPlayerModal({ movie, idClient, idVersiune, onClose }) {
   const [progress, setProgress] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
   const [isDragging, setIsDragging] = useState(false);
@@ -55,10 +55,11 @@ function VideoPlayerModal({ movie, idClient, onClose }) {
   const saveInitial = async () => {
     if (initRef.current) return;
     initRef.current = true;
+    if (!idVersiune) return;
     try {
       const res = await api.postVizualizare({
         idClient,
-        idVersiune: 1,
+        idVersiune,
         durata: 0,
         stare: 'IN_PROGRESS'
       });
@@ -77,7 +78,7 @@ function VideoPlayerModal({ movie, idClient, onClose }) {
       await api.updateVizualizare(idVizualizare, {
         id: idVizualizare,
         idClient,
-        idVersiune: 1,
+        idVersiune,
         durata: durataValue,
         stare: status
       });
@@ -89,7 +90,7 @@ function VideoPlayerModal({ movie, idClient, onClose }) {
 
   useEffect(() => {
     saveInitial();
-  }, []);
+  }, [idVersiune]);
 
   useEffect(() => {
     latestStateRef.current = {
@@ -223,7 +224,7 @@ function VideoPlayerModal({ movie, idClient, onClose }) {
   }, [isDragging, progress, wasPlayingBeforeDrag]);
 
   const displayTime = `${formatTimeFromPercent(progress)} / ${formatTimeFromPercent(100)}`;
-  const controlsDisabled = !idVizualizare;
+  const controlsDisabled = !idVizualizare || !idVersiune;
 
   return createPortal(
     <div className="modal fade show d-block" tabIndex="-1" role="dialog">
