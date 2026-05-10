@@ -337,12 +337,12 @@ BEGIN
                        seq_clienti.NEXTVAL,
                        v_nume_val,
                        v_prenume_val,
-                       '021',
+                       '+40',
                        TRUNC(DBMS_RANDOM.VALUE(1000000, 9999999)),
                        v_strada || ' Nr. ' || TRUNC(DBMS_RANDOM.VALUE(1, 99)),
                        v_oras_val,
                        LOWER(v_prenume_val || '.' || v_nume_val || ROUND(DBMS_RANDOM.VALUE(10,99))) || '@email.ro',
-                       '07' || TRUNC(DBMS_RANDOM.VALUE(20, 99)),
+                       '+40',
                        TRUNC(DBMS_RANDOM.VALUE(1000000, 9999999)),
                        TO_DATE('1970-01-01', 'YYYY-MM-DD') + DBMS_RANDOM.VALUE(0, 15000)
                    );

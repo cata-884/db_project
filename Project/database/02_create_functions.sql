@@ -55,7 +55,11 @@ BEGIN
         RETURN 'NEUTRU';
 END IF;
 
-    v_text := ' ' || REGEXP_REPLACE(LOWER(p_text), '[[:punct:]]', ' ') || ' ';
+    v_text := ' ' || REGEXP_REPLACE(
+                        TRANSLATE(LOWER(p_text),
+                            'ăâîșțĂÂÎȘȚ',
+                            'aaistaaist'),
+                        '[[:punct:]]', ' ') || ' ';
 
 FOR i IN 1 .. cuv_poz.COUNT LOOP
         v_scor_pozitiv := v_scor_pozitiv + numara_aparitii(v_text, cuv_poz(i));

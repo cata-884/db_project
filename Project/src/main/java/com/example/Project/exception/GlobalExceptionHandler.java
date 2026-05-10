@@ -51,6 +51,11 @@ public class GlobalExceptionHandler {
                 return ResponseEntity.badRequest()
                         .body(Map.of("error", "Referință inexistentă: " + sqlEx.getMessage()));
             }
+            if (code == 2292) {
+                // ORA-02292: child record found — e.g. DELETE film cu recenzii existente
+                return ResponseEntity.status(HttpStatus.CONFLICT)
+                        .body(Map.of("error", "Nu se poate șterge: există înregistrări dependente."));
+            }
         }
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(Map.of("error", ex.getMessage()));
