@@ -2,9 +2,9 @@ import { useEffect, useState } from 'react';
 import { api } from '../api.js';
 import EticheteSelector from './EticheteSelector.jsx';
 
-function ReviewForm({ idFilm, idClient, existingReview, distributie = [], onSubmitted }) {
-  const [nota, setNota] = useState(existingReview?.nota ?? 8);
-  const [textComentariu, setTextComentariu] = useState(existingReview?.textComentariu ?? '');
+function ReviewForm({ idFilm, idClient, distributie = [], onSubmitted }) {
+  const [nota, setNota] = useState(8);
+  const [textComentariu, setTextComentariu] = useState('');
   const [etichete, setEtichete] = useState([]);
   const [selected, setSelected] = useState(new Set());
   const [actoriComentarii, setActoriComentarii] = useState({});
@@ -42,33 +42,20 @@ function ReviewForm({ idFilm, idClient, existingReview, distributie = [], onSubm
     setError('');
     setLoading(true);
     try {
-      const isEdit = !!existingReview?.id;
+      const actoriIds = Object.keys(actoriComentarii)
+        .filter((k) => actoriComentarii[k].trim() !== '')
+        .map(Number);
+      const actoriCom = actoriIds.map((id) => actoriComentarii[id]);
 
-      if (isEdit) {
-        await api.updateRecenzie(existingReview.id, {
-          nota: Number(nota),
-          textComentariu
-        });
-        // adauga etichete noi selectate (duplicate ignorate de backend)
-        for (const idEticheta of selected) {
-          try { await api.addEticheta(existingReview.id, idEticheta); } catch { /* ignore duplicates */ }
-        }
-      } else {
-        const actoriIds = Object.keys(actoriComentarii)
-          .filter((k) => actoriComentarii[k].trim() !== '')
-          .map(Number);
-        const actoriCom = actoriIds.map((id) => actoriComentarii[id]);
-
-        await api.postRecenzie({
-          idClient,
-          idFilm,
-          nota: Number(nota),
-          textComentariu,
-          etichetaIds: [...selected],
-          actoriIds,
-          actoriComentarii: actoriCom,
-        });
-      }
+      await api.postRecenzie({
+        idClient,
+        idFilm,
+        nota: Number(nota),
+        textComentariu,
+        etichetaIds: [...selected],
+        actoriIds,
+        actoriComentarii: actoriCom,
+      });
 
       setTextComentariu('');
       setSelected(new Set());
@@ -87,11 +74,9 @@ function ReviewForm({ idFilm, idClient, existingReview, distributie = [], onSubm
     }
   };
 
-  const isEditMode = !!existingReview?.id;
-
   return (
     <form onSubmit={handleSubmit} className="card card-body">
-      <h5 className="mb-3">{isEditMode ? 'Editeaza recenzia' : 'Adauga o recenzie'}</h5>
+      <h5 className="mb-3">Adauga o recenzie</h5>
       {error && <div className="alert alert-danger">{error}</div>}
 
       <div className="mb-3">
@@ -121,7 +106,7 @@ function ReviewForm({ idFilm, idClient, existingReview, distributie = [], onSubm
         <EticheteSelector etichete={etichete} selected={selected} onToggle={toggle} />
       </div>
 
-      {!isEditMode && distributie.length > 0 && (
+      {distributie.length > 0 && (
         <div className="mb-3">
           <label className="form-label">Comentarii despre actori (optional)</label>
           <div className="list-group">
@@ -149,7 +134,7 @@ function ReviewForm({ idFilm, idClient, existingReview, distributie = [], onSubm
       )}
 
       <button className="btn btn-primary" type="submit" disabled={loading}>
-        {loading ? 'Se salveaza...' : isEditMode ? 'Actualizeaza' : 'Posteaza'}
+        {loading ? 'Se salveaza...' : 'Posteaza'}
       </button>
     </form>
   );

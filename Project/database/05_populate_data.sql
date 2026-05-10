@@ -121,7 +121,6 @@ DECLARE
 
     l_roluri varr := varr('PROTAGONIST', 'ANTAGONIST', 'SECUNDAR', 'EPISODIC', 'DUBLURA');
     l_orase  varr := varr('București', 'Cluj-Napoca', 'Iași', 'Timișoara', 'Constanța', 'Brașov', 'Craiova', 'Galați');
-    l_stari  varr := varr('IN_PROGRESS', 'COMPLETED', 'PAUSED', 'ABANDONED');
 
     l_et_den varr := varr(
             'MI_A_PLACUT',
@@ -226,7 +225,6 @@ DECLARE
     v_prenume_val VARCHAR2(100);
     v_rol        VARCHAR2(20);
     v_oras_val   VARCHAR2(100);
-    v_stare_val  VARCHAR2(20);
     v_et_den_val VARCHAR2(50);
     v_et_sent_val VARCHAR2(10);
     v_sentiment  VARCHAR2(10);
@@ -360,16 +358,12 @@ BEGIN
     FOR i IN 1..120 LOOP
             SELECT id INTO v_id_1 FROM (SELECT id FROM clienti      ORDER BY DBMS_RANDOM.VALUE()) FETCH FIRST 1 ROW ONLY;
             SELECT id INTO v_id_2 FROM (SELECT id FROM versiuni_film ORDER BY DBMS_RANDOM.VALUE()) FETCH FIRST 1 ROW ONLY;
-            v_idx       := TRUNC(DBMS_RANDOM.VALUE(1, l_stari.COUNT + 1));
-            v_stare_val := l_stari(v_idx);
-            INSERT INTO vizualizari (id, id_client, id_versiune, data_vizualizare, durata, stare)
+            INSERT INTO vizualizari (id, id_client, id_versiune, data_vizualizare)
             VALUES (
                        seq_vizualizari.NEXTVAL,
                        v_id_1,
                        v_id_2,
-                       CURRENT_DATE - DBMS_RANDOM.VALUE(1, 100),
-                       DBMS_RANDOM.VALUE(1, 180),
-                       v_stare_val
+                       CURRENT_DATE - DBMS_RANDOM.VALUE(1, 100)
                    );
         END LOOP;
 

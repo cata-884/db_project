@@ -1,14 +1,3 @@
-/*
-sudo podman run --replace -d --name oracle-xe \
-  -p 1521:1521 \
-  -e ORACLE_PASSWORD=parola \
-  -e APP_USER=movie_user \
-  -e APP_USER_PASSWORD=parola \
-  docker.io/gvenzl/oracle-xe:21-slim
-
- sudo podman logs -f oracle-xe
- */
-
 -- Secvente
 CREATE SEQUENCE seq_categorii    START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE;
 CREATE SEQUENCE seq_filme        START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE;
@@ -77,9 +66,7 @@ CREATE TABLE vizualizari (
     id                  NUMBER DEFAULT seq_vizualizari.NEXTVAL PRIMARY KEY,
     id_client           NUMBER NOT NULL REFERENCES clienti(id),
     id_versiune         NUMBER NOT NULL REFERENCES versiuni_film(id),
-    data_vizualizare    DATE,
-    durata              NUMBER(6, 2),
-    stare               VARCHAR2(20) CHECK (stare IN ('IN_PROGRESS','COMPLETED','PAUSED','ABANDONED'))
+    data_vizualizare    DATE
 );
 
 CREATE TABLE etichete (

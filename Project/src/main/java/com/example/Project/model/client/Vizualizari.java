@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+
 import java.time.LocalDate;
 
 @Data
@@ -14,6 +15,4 @@ public class Vizualizari {
     private Long idClient;
     private Long idVersiune;
     private LocalDate dataVizualizare;
-    private Float durata;
-    private StareVizualizare stare;
 }

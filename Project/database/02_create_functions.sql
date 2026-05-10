@@ -1,8 +1,3 @@
--- NOTA: am pus functiile inaintea procedurilor pentru ca
--- p_analiza_sezoniera nu depinde de ele, dar este o practica
--- buna sa creezi functiile inainte ca sa fie disponibile pentru
--- proceduri/triggere viitoare care le-ar putea folosi
-
 -- f_analiza_sentiment
 -- Scaneaza textul unui comentariu si returneaza POZITIV/NEGATIV/NEUTRU
 -- pe baza numarului de cuvinte cheie identificate.

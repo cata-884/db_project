@@ -73,6 +73,9 @@ export const api = {
   updateRecenzie: (id, data) =>
     apiFetch(`/api/recenzii/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
 
+  deleteRecenzie: (id) =>
+    apiFetch(`/api/recenzii/${id}`, { method: 'DELETE' }),
+
   getEtichete: () => apiFetch('/api/etichete'),
 
   addEticheta: (idRecenzie, idEticheta) =>

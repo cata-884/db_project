@@ -41,7 +41,7 @@ function AccountPage() {
   const validateForm = () => {
     if (!form) return 'Date invalide.';
     const digitsOnly = (value) => value === '' || /^[0-9]+$/.test(value);
-    if (!digitsOnly(form.telefonFixNr) || !digitsOnly(form.telefonMobilNr)) {
+    if (!digitsOnly(form.telefonFixNr.trim()) || !digitsOnly(form.telefonMobilNr.trim())) {
       return 'Numerele de telefon trebuie sa contina doar cifre.';
     }
     const trimmedAddress = form.adresa.trim();
@@ -114,46 +114,28 @@ function AccountPage() {
             {editMode ? (
               <div className="d-grid gap-3">
                 <div>
-                  <label className="form-label">Telefon fix</label>
-                  <div className="d-flex gap-2">
-                    <select
-                      className="form-select"
-                      value={form.telefonFixCod}
-                      onChange={(e) => setForm({ ...form, telefonFixCod: e.target.value })}
-                    >
-                      <option>+40</option>
-                      <option>+1</option>
-                      <option>+44</option>
-                      <option>+49</option>
-                    </select>
-                    <input
-                      className="form-control"
-                      value={form.telefonFixNr}
-                      onChange={(e) => setForm({ ...form, telefonFixNr: e.target.value })}
-                      placeholder="0212345678"
-                    />
-                  </div>
+                  <label className="form-label">Telefon fix <span className="text-muted fw-normal small">(prefix nr, ex: +40 0212345678)</span></label>
+                  <input
+                    className="form-control"
+                    value={`${form.telefonFixCod} ${form.telefonFixNr}`}
+                    onChange={(e) => {
+                      const [cod, ...rest] = e.target.value.split(' ');
+                      setForm({ ...form, telefonFixCod: cod, telefonFixNr: rest.join('') });
+                    }}
+                    placeholder="+40 0212345678"
+                  />
                 </div>
                 <div>
-                  <label className="form-label">Telefon mobil</label>
-                  <div className="d-flex gap-2">
-                    <select
-                      className="form-select"
-                      value={form.telefonMobilCod}
-                      onChange={(e) => setForm({ ...form, telefonMobilCod: e.target.value })}
-                    >
-                      <option>+40</option>
-                      <option>+1</option>
-                      <option>+44</option>
-                      <option>+49</option>
-                    </select>
-                    <input
-                      className="form-control"
-                      value={form.telefonMobilNr}
-                      onChange={(e) => setForm({ ...form, telefonMobilNr: e.target.value })}
-                      placeholder="0712345678"
-                    />
-                  </div>
+                  <label className="form-label">Telefon mobil <span className="text-muted fw-normal small">(prefix nr, ex: +40 0712345678)</span></label>
+                  <input
+                    className="form-control"
+                    value={`${form.telefonMobilCod} ${form.telefonMobilNr}`}
+                    onChange={(e) => {
+                      const [cod, ...rest] = e.target.value.split(' ');
+                      setForm({ ...form, telefonMobilCod: cod, telefonMobilNr: rest.join('') });
+                    }}
+                    placeholder="+40 0712345678"
+                  />
                 </div>
                 <div>
                   <label className="form-label">Adresa</label>

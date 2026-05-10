@@ -104,18 +104,14 @@ function ProfilePage() {
                     <th>Titlu</th>
                     <th>Versiune</th>
                     <th>Data</th>
-                    <th>Durata</th>
-                    <th>Stare</th>
                   </tr>
                 </thead>
                 <tbody>
                   {istoric.map((v, idx) => (
-                    <tr key={v.id || idx}>
-                      <td>{v.titlu || v.titluFilm || v.titlu_film || '-'}</td>
-                      <td>{v.versiune || v.idVersiune || v.id_versiune || '-'}</td>
-                      <td>{v.dataVizualizare || v.data_vizualizare || '-'}</td>
-                      <td>{v.durata || '-'}</td>
-                      <td>{v.stare || '-'}</td>
+                    <tr key={v.idVizualizare || idx}>
+                      <td>{v.titluFilm || '-'}</td>
+                      <td>{v.denumireVersiune || '-'}</td>
+                      <td>{v.dataVizualizare || '-'}</td>
                     </tr>
                   ))}
                 </tbody>

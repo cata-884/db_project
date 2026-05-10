@@ -21,15 +21,6 @@
             </PendingDiffInfo>
           </value>
         </entry>
-        <entry key="$PROJECT_DIR$/Project/src/main/java/com/example/Project/controller/ClientiController.java">
-          <value>
-            <PendingDiffInfo>
-              <option name="filePath" value="$PROJECT_DIR$/Project/src/main/java/com/example/Project/controller/ClientiController.java" />
-              <option name="originalContent" value="package com.example.Project.controller;&#10;&#10;import com.example.Project.dto.response.ClientResponse;&#10;import com.example.Project.service.ClientiService;&#10;import org.springframework.web.bind.annotation.*;&#10;&#10;@RestController&#10;@RequestMapping(&quot;/api/clienti&quot;)&#10;public class ClientiController {&#10;&#10;    private final ClientiService clientiService;&#10;&#10;    public ClientiController(ClientiService clientiService) {&#10;        this.clientiService = clientiService;&#10;    }&#10;&#10;    // /me?username=xxx elimina IDOR-ul pe ID numeric&#10;    @GetMapping(&quot;/me&quot;)&#10;    public ClientResponse me(@RequestParam String username) {&#10;        return clientiService.getMe(username);&#10;    }&#10;}&#10;" />
-              <option name="updatedContent" value="package com.example.Project.controller;&#10;&#10;import com.example.Project.dto.request.UpdateClientRequest;&#10;import com.example.Project.dto.response.ClientResponse;&#10;import com.example.Project.service.ClientiService;&#10;import org.springframework.web.bind.annotation.*;&#10;&#10;@RestController&#10;@RequestMapping(&quot;/api/clienti&quot;)&#10;public class ClientiController {&#10;&#10;    private final ClientiService clientiService;&#10;&#10;    public ClientiController(ClientiService clientiService) {&#10;        this.clientiService = clientiService;&#10;    }&#10;&#10;    // /me?username=xxx elimina IDOR-ul pe ID numeric&#10;    @GetMapping(&quot;/me&quot;)&#10;    public ClientResponse me(@RequestParam String username) {&#10;        return clientiService.getMe(username);&#10;    }&#10;&#10;    @PutMapping(&quot;/me&quot;)&#10;    public ClientResponse updateMe(@RequestParam String username,&#10;                                   @RequestBody UpdateClientRequest req) {&#10;        return clientiService.updateMe(username, req);&#10;    }&#10;}" />
-            </PendingDiffInfo>
-          </value>
-        </entry>
         <entry key="$PROJECT_DIR$/Project/src/main/java/com/example/Project/dao/AuthDao.java">
           <value>
             <PendingDiffInfo>

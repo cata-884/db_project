@@ -3,8 +3,6 @@ import { api } from '../api.js';
 
 const LUNI = ['Ian', 'Feb', 'Mar', 'Apr', 'Mai', 'Iun', 'Iul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
-const RANK_COLORS = { 1: '#198754', 2: '#0dcaf0', 3: '#ffc107', 4: '#adb5bd', 5: '#dee2e6' };
-
 function SezonHeatmap({ data }) {
   if (!data || data.length === 0) return <div className="text-muted">Nu exista date sezoniere.</div>;
 
@@ -32,11 +30,11 @@ function SezonHeatmap({ data }) {
               {LUNI.map((_, i) => {
                 const luna = i + 1;
                 const cell = byKey[`${cat}|${luna}`];
-                const bg = cell ? RANK_COLORS[cell.rankCategorie] || '#f8f9fa' : '#f8f9fa';
+                const hue = cell ? Math.max(0, 120 - (cell.rankCategorie - 1) * 30) : null;
                 return (
                   <td
                     key={luna}
-                    style={{ background: bg, color: cell && cell.rankCategorie <= 2 ? '#fff' : '#000' }}
+                    style={{ backgroundColor: hue !== null ? `hsl(${hue}, 70%, 85%)` : '#f8f9fa' }}
                     title={cell ? `${cell.nrVizionari} vizionari (rank ${cell.rankCategorie})` : ''}
                   >
                     {cell ? cell.nrVizionari : ''}
@@ -130,11 +128,11 @@ function GrupareSection() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const calculeaza = async () => {
+  const calculeaza = async (th = threshold) => {
     setLoading(true);
     setError('');
     try {
-      const res = await api.getGrupare(threshold);
+      const res = await api.getGrupare(th);
       setData(res || []);
     } catch (err) {
       setError(err.message);
@@ -154,23 +152,22 @@ function GrupareSection() {
 
   return (
     <div>
-      <div className="d-flex align-items-center gap-3 mb-3">
-        <div>
-          <label className="form-label mb-0 me-2">Threshold: {threshold.toFixed(2)}</label>
-          <input
-            type="range"
-            className="form-range"
-            min="0"
-            max="1"
-            step="0.05"
-            value={threshold}
-            onChange={(e) => setThreshold(Number(e.target.value))}
-            style={{ width: '200px', display: 'inline-block' }}
-          />
-        </div>
-        <button className="btn btn-primary btn-sm" onClick={calculeaza} disabled={loading}>
-          {loading ? 'Se calculeaza...' : 'Calculeaza'}
-        </button>
+      <div className="d-flex align-items-center gap-2 mb-3">
+        {[
+          { label: 'Loose', value: 0.3 },
+          { label: 'Medium', value: 0.5 },
+          { label: 'Tight', value: 0.7 },
+        ].map((preset) => (
+          <button
+            key={preset.value}
+            className={`btn btn-sm ${threshold === preset.value ? 'btn-primary' : 'btn-outline-primary'}`}
+            onClick={() => { setThreshold(preset.value); calculeaza(preset.value); }}
+            disabled={loading}
+          >
+            {preset.label} ({preset.value})
+          </button>
+        ))}
+        {loading && <span className="text-muted small ms-2">Se calculeaza...</span>}
       </div>
       {error && <div className="alert alert-danger">{error}</div>}
       {grupe && Object.keys(grupe).length === 0 && (
@@ -289,7 +286,7 @@ function StatsPage() {
         <div>
           <h5>Vizionari pe categorie si luna (top 5 categorii/luna)</h5>
           <p className="text-muted small">
-            Verde = rank 1, Cyan = rank 2, Galben = rank 3, Gri = rank 4-5
+            Verde = rank 1 (cel mai popular), Rosu deschis = rank 5 (mai putin popular)
           </p>
           {sezonLoading && <div className="text-muted">Se incarca...</div>}
           {sezonError && <div className="alert alert-danger">{sezonError}</div>}

@@ -13,6 +13,4 @@ public class IstoricVizionareResponse {
     private String titluFilm;
     private String denumireVersiune;
     private LocalDate dataVizualizare;
-    private Float durata;
-    private String stare;
 }

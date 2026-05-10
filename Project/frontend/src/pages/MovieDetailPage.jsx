@@ -52,6 +52,15 @@ function MovieDetailPage() {
     setShowPlayer(true);
   };
 
+  const handleDeleteRecenzie = async (idRecenzie) => {
+    try {
+      await api.deleteRecenzie(idRecenzie);
+      loadAll();
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
   if (loading) return <div>Se incarca...</div>;
   if (error) return <div className="alert alert-danger">{error}</div>;
   if (!movie) return <div className="text-muted">Film inexistent.</div>;
@@ -115,15 +124,33 @@ function MovieDetailPage() {
           <ReviewList reviews={reviews} />
         </div>
 
-        {user && (
-          <ReviewForm
-            idFilm={movie.id}
-            idClient={user.id}
-            existingReview={reviews.find((r) => r.idClient === user.id || r.id_client === user.id) ?? null}
-            distributie={actors}
-            onSubmitted={loadAll}
-          />
-        )}
+        {user && (() => {
+          const existingReview = reviews.find((r) => r.idClient === user.id || r.id_client === user.id);
+          if (existingReview) {
+            return (
+              <div className="card card-body">
+                <h5>Recenzia ta</h5>
+                <p className="text-muted small mb-2">
+                  Ai deja o recenzie pentru acest film. Poti sterge recenzia si posta una noua.
+                </p>
+                <button
+                  className="btn btn-outline-danger btn-sm"
+                  onClick={() => handleDeleteRecenzie(existingReview.id)}
+                >
+                  Sterge recenzia
+                </button>
+              </div>
+            );
+          }
+          return (
+            <ReviewForm
+              idFilm={movie.id}
+              idClient={user.id}
+              distributie={actors}
+              onSubmitted={loadAll}
+            />
+          );
+        })()}
       </div>
 
       <div className="col-lg-4">
