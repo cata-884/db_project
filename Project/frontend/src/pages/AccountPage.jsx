@@ -1,9 +1,7 @@
 import { useEffect, useState } from 'react';
 import { api } from '../api.js';
-import { auth } from '../auth.js';
 
 function AccountPage() {
-  const user = auth.get();
   const [client, setClient] = useState(null);
   const [form, setForm] = useState(null);
   const [editMode, setEditMode] = useState(false);
@@ -14,7 +12,7 @@ function AccountPage() {
   useEffect(() => {
     let ignore = false;
     api
-      .getMe(user.username)
+      .getMe()
       .then((res) => {
         if (!ignore) {
           setClient(res);
@@ -38,7 +36,7 @@ function AccountPage() {
     return () => {
       ignore = true;
     };
-  }, [user.username]);
+  }, []);
 
   const validateForm = () => {
     if (!form) return 'Date invalide.';
@@ -74,7 +72,7 @@ function AccountPage() {
     setError('');
     setSaving(true);
     try {
-      const updated = await api.updateMe(user.username, form);
+      const updated = await api.updateMe(form);
       setClient(updated);
       setEditMode(false);
     } catch (err) {

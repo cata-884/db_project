@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../api.js';
-import { auth } from '../auth.js';
+import { saveSession } from '../auth.js';
 
 function LoginPage() {
   const [username, setUsername] = useState('');
@@ -19,10 +19,10 @@ function LoginPage() {
     setError('');
     setLoading(true);
     try {
-      const user = isRegister
+      const response = isRegister
         ? await api.register({ username, parola, nume, prenume, email })
         : await api.login(username, parola);
-      auth.save(user);
+      saveSession(response);
       navigate('/movies');
     } catch (err) {
       const message = String(err?.message || '').toLowerCase();
@@ -121,4 +121,3 @@ function LoginPage() {
 }
 
 export default LoginPage;
-

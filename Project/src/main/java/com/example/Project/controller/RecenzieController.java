@@ -1,10 +1,12 @@
 package com.example.Project.controller;
 
+import com.example.Project.config.CurrentUser;
 import com.example.Project.dto.request.CreateRecenzieRequest;
 import com.example.Project.dto.request.UpdateRecenzieRequest;
 import com.example.Project.dto.response.RecenzieDetailResponse;
 import com.example.Project.dto.response.RecenzieResponse;
 import com.example.Project.service.RecenzieService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,8 +32,10 @@ public class RecenzieController {
     }
 
     @PostMapping
-    public ResponseEntity<RecenzieDetailResponse> create(@RequestBody CreateRecenzieRequest req) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(recenzieService.create(req));
+    public ResponseEntity<RecenzieDetailResponse> create(HttpServletRequest req,
+                                                          @RequestBody CreateRecenzieRequest body) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(recenzieService.create(CurrentUser.getId(req), body));
     }
 
     @PutMapping("/{id}")

@@ -120,3 +120,15 @@ CREATE GLOBAL TEMPORARY TABLE tmp_grupare_clienti (
     id_client NUMBER NOT NULL,
     id_grupa  NUMBER NOT NULL
 ) ON COMMIT PRESERVE ROWS;
+
+CREATE TABLE sesiuni (
+    token       VARCHAR2(64)  PRIMARY KEY,
+    id_client   NUMBER        NOT NULL,
+    creata_la   TIMESTAMP     DEFAULT SYSTIMESTAMP NOT NULL,
+    expira_la   TIMESTAMP     NOT NULL,
+    CONSTRAINT fk_sesiuni_client FOREIGN KEY (id_client)
+        REFERENCES clienti(id) ON DELETE CASCADE
+);
+
+CREATE INDEX idx_sesiuni_expira ON sesiuni(expira_la);
+CREATE INDEX idx_sesiuni_client ON sesiuni(id_client);

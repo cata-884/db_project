@@ -6,10 +6,10 @@ import MovieDetailPage from './pages/MovieDetailPage.jsx';
 import ProfilePage from './pages/ProfilePage.jsx';
 import StatsPage from './pages/StatsPage.jsx';
 import AccountPage from './pages/AccountPage.jsx';
-import { auth } from './auth.js';
+import { isAuthenticated } from './auth.js';
 
 function ProtectedRoute({ children }) {
-  return auth.isLoggedIn() ? children : <Navigate to="/login" />;
+  return isAuthenticated() ? children : <Navigate to="/login" replace />;
 }
 
 function App() {
@@ -53,4 +53,3 @@ function App() {
 }
 
 export default App;
-

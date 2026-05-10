@@ -1,9 +1,11 @@
 package com.example.Project.controller;
 
+import com.example.Project.config.CurrentUser;
 import com.example.Project.dto.request.CreateVizualizareRequest;
 import com.example.Project.dto.response.IstoricVizionareResponse;
 import com.example.Project.model.client.Vizualizari;
 import com.example.Project.service.VizualizareService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,8 +31,9 @@ public class VizualizareController {
     }
 
     @PostMapping
-    public ResponseEntity<Vizualizari> create(@RequestBody CreateVizualizareRequest req) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(vizualizareService.create(req));
+    public ResponseEntity<Vizualizari> create(HttpServletRequest req, @RequestBody CreateVizualizareRequest body) {
+        body.setIdClient(CurrentUser.getId(req));
+        return ResponseEntity.status(HttpStatus.CREATED).body(vizualizareService.create(body));
     }
 
     @PutMapping("/{id}")
@@ -44,8 +47,8 @@ public class VizualizareController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/client/{idClient}")
-    public List<IstoricVizionareResponse> getIstoricByClient(@PathVariable Long idClient) {
-        return vizualizareService.getIstoricByClient(idClient);
+    @GetMapping("/me")
+    public List<IstoricVizionareResponse> getIstoricForMe(HttpServletRequest req) {
+        return vizualizareService.getIstoricByClient(CurrentUser.getId(req));
     }
 }

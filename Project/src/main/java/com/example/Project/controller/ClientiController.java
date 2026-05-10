@@ -1,8 +1,10 @@
 package com.example.Project.controller;
 
+import com.example.Project.config.CurrentUser;
 import com.example.Project.dto.request.UpdateClientRequest;
 import com.example.Project.dto.response.ClientResponse;
 import com.example.Project.service.ClientiService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -15,15 +17,13 @@ public class ClientiController {
         this.clientiService = clientiService;
     }
 
-    // /me?username=xxx elimina IDOR-ul pe ID numeric
     @GetMapping("/me")
-    public ClientResponse me(@RequestParam String username) {
-        return clientiService.getMe(username);
+    public ClientResponse me(HttpServletRequest req) {
+        return clientiService.getById(CurrentUser.getId(req));
     }
 
     @PutMapping("/me")
-    public ClientResponse updateMe(@RequestParam String username,
-                                   @RequestBody UpdateClientRequest req) {
-        return clientiService.updateMe(username, req);
+    public ClientResponse updateMe(HttpServletRequest req, @RequestBody UpdateClientRequest body) {
+        return clientiService.update(CurrentUser.getId(req), body);
     }
 }

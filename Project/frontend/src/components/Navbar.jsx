@@ -1,12 +1,14 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { auth } from '../auth.js';
+import { getUser, clearSession, isAuthenticated } from '../auth.js';
+import { api } from '../api.js';
 
 function Navbar() {
   const navigate = useNavigate();
-  const user = auth.get();
+  const user = getUser();
 
-  const handleLogout = () => {
-    auth.clear();
+  const handleLogout = async () => {
+    try { await api.logout(); } catch { /* ignora erori de retea */ }
+    clearSession();
     navigate('/login');
   };
 
@@ -23,21 +25,21 @@ function Navbar() {
                 Filme
               </Link>
             </li>
-            {user && (
+            {isAuthenticated() && (
               <li className="nav-item">
                 <Link className="nav-link" to="/profile">
                   Profil
                 </Link>
               </li>
             )}
-            {user && (
+            {isAuthenticated() && (
               <li className="nav-item">
                 <Link className="nav-link" to="/stats">
                   Statistici
                 </Link>
               </li>
             )}
-            {user && (
+            {isAuthenticated() && (
               <li className="nav-item">
                 <Link className="nav-link" to="/account">
                   Contul meu
@@ -46,9 +48,9 @@ function Navbar() {
             )}
           </ul>
           <div className="d-flex align-items-center gap-2">
-            {user ? (
+            {isAuthenticated() ? (
               <>
-                <span className="text-light small">Salut, {user.nume}!</span>
+                <span className="text-light small">Salut, {user?.nume}!</span>
                 <button className="btn btn-outline-light btn-sm" onClick={handleLogout}>
                   Logout
                 </button>

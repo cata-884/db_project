@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { api } from '../api.js';
-import { auth } from '../auth.js';
 
 const LUNI = ['Ian', 'Feb', 'Mar', 'Apr', 'Mai', 'Iun', 'Iul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
@@ -199,7 +198,7 @@ function GrupareSection() {
   );
 }
 
-function SimilariSection({ idClient }) {
+function SimilariSection() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -207,7 +206,7 @@ function SimilariSection({ idClient }) {
   useEffect(() => {
     let ignore = false;
     api
-      .getSimilari(idClient, 5)
+      .getSimilari(5)
       .then((res) => {
         if (!ignore) setData(res || []);
       })
@@ -220,7 +219,7 @@ function SimilariSection({ idClient }) {
     return () => {
       ignore = true;
     };
-  }, [idClient]);
+  }, []);
 
   if (loading) return <div className="text-muted">Se incarca...</div>;
   if (error) return <div className="alert alert-danger">{error}</div>;
@@ -239,7 +238,6 @@ function SimilariSection({ idClient }) {
 }
 
 function StatsPage() {
-  const user = auth.get();
   const [sezonData, setSezonData] = useState(null);
   const [sezonLoading, setSezonLoading] = useState(true);
   const [sezonError, setSezonError] = useState('');
@@ -325,7 +323,7 @@ function StatsPage() {
           <p className="text-muted small">
             Scorul combina 70% Jaccard pe filme comune si 30% proximitate rating.
           </p>
-          {user && <SimilariSection idClient={user.id} />}
+          <SimilariSection />
         </div>
       )}
     </div>

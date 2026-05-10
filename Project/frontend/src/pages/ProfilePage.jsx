@@ -1,11 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../api.js';
-import { auth } from '../auth.js';
 import MovieCard from '../components/MovieCard.jsx';
 
 function ProfilePage() {
-  const user = auth.get();
   const navigate = useNavigate();
   const [profil, setProfil] = useState(null);
   const [recomandari, setRecomandari] = useState([]);
@@ -20,9 +18,9 @@ function ProfilePage() {
       setError('');
       try {
         const [profilData, recData, istoricData] = await Promise.all([
-          api.getProfil(user.id),
-          api.getRecomandari(user.id),
-          api.getIstoric(user.id)
+          api.getProfil(),
+          api.getRecomandari(),
+          api.getIstoric()
         ]);
         if (!ignore) {
           setProfil(profilData);
@@ -40,7 +38,7 @@ function ProfilePage() {
     return () => {
       ignore = true;
     };
-  }, [user.id]);
+  }, []);
 
   if (loading) return <div>Se incarca...</div>;
   if (error) return <div className="alert alert-danger">{error}</div>;
@@ -131,4 +129,3 @@ function ProfilePage() {
 }
 
 export default ProfilePage;
-

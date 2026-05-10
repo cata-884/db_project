@@ -12,6 +12,9 @@ public class AuthService {
     @Autowired
     private AuthDao authDao;
 
+    @Autowired
+    private SesiuneService sesiuneService;
+
     public LoginResponse login(String username, String parola) {
         if (username == null || username.isBlank())
             throw new IllegalArgumentException("Username-ul este obligatoriu");
@@ -21,7 +24,9 @@ public class AuthService {
         Client client = authDao.findByUsernameAndPassword(username, parola)
                 .orElseThrow(() -> new IllegalArgumentException("Username sau parola incorecte"));
 
-        return new LoginResponse(client.getId(), client.getUsername(),
+        String token = sesiuneService.creeazaTokenPentru(client.getId());
+
+        return new LoginResponse(token, client.getId(), client.getUsername(),
                 client.getNume(), client.getPrenume(), client.getEmail());
     }
 
@@ -42,6 +47,8 @@ public class AuthService {
         Long id = authDao.insertBasicClient(nume, prenume, (email == null || email.isBlank()) ? null : email,
                 username, parola);
 
-        return new LoginResponse(id, username, nume, prenume, email);
+        String token = sesiuneService.creeazaTokenPentru(id);
+
+        return new LoginResponse(token, id, username, nume, prenume, email);
     }
 }

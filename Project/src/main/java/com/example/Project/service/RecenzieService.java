@@ -28,8 +28,7 @@ public class RecenzieService {
     }
 
     @Transactional
-    public RecenzieDetailResponse create(CreateRecenzieRequest req) {
-        if (req.getIdClient() == null) throw new IllegalArgumentException("id_client este obligatoriu");
+    public RecenzieDetailResponse create(Long idClient, CreateRecenzieRequest req) {
         if (req.getIdFilm() == null) throw new IllegalArgumentException("id_film este obligatoriu");
         if (req.getNota() == null || req.getNota() < 1 || req.getNota() > 10)
             throw new IllegalArgumentException("Nota trebuie sa fie intre 1 si 10");
@@ -37,7 +36,7 @@ public class RecenzieService {
             throw new IllegalArgumentException("textComentariu depaseste 4000 caractere");
 
         Long id = recenzieDao.creeazaRecenzieCompleta(
-                req.getIdClient(), req.getIdFilm(), req.getNota(), req.getTextComentariu(),
+                idClient, req.getIdFilm(), req.getNota(), req.getTextComentariu(),
                 req.getEtichetaIds(), req.getActoriIds(), req.getActoriComentarii());
 
         return recenzieDao.findDetailById(id)

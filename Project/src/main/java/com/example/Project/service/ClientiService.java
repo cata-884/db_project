@@ -21,6 +21,20 @@ public class ClientiService {
         this.clientiDao = clientiDao;
     }
 
+    public ClientResponse getById(Long id) {
+        Client c = authDao.findById(id)
+                .orElseThrow(() -> new NotFoundException("Client negasit cu id: " + id));
+        return toResponse(c);
+    }
+
+    @Transactional
+    public ClientResponse update(Long id, UpdateClientRequest req) {
+        authDao.findById(id).orElseThrow(() -> new NotFoundException("Client negasit cu id: " + id));
+        clientiDao.update(id, req);
+        return getById(id);
+    }
+
+    /** Pastrare backward-compat pentru alte utilizari interne */
     public ClientResponse getMe(String username) {
         Client c = authDao.findByUsername(username)
                 .orElseThrow(() -> new NotFoundException("Client negasit: " + username));
