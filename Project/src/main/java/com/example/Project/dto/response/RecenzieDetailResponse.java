@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -17,4 +18,6 @@ public class RecenzieDetailResponse {
     private String sentiment;
     private String textComentariu;
     private LocalDateTime dataPostare;
+    private List<String> etichete;
+    private List<ComentariuActorDto> actoriComentarii;
 }

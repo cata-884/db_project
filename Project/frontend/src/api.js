@@ -32,6 +32,11 @@ export const api = {
       method: 'POST',
       body: JSON.stringify({ username, parola })
     }),
+  register: (data) =>
+    request('/api/auth/register', {
+      method: 'POST',
+      body: JSON.stringify(data)
+    }),
   getFilme: () => request('/api/filme'),
   getFilmeByCategorie: (idCategorie) => request(`/api/filme/categorie/${idCategorie}`),
   getFilm: (id) => request(`/api/filme/${id}`),
@@ -57,8 +62,14 @@ export const api = {
   getProfil: (idClient) => request(`/api/stats/profil/${idClient}`),
   getSimilari: (idClient, topN = 5) =>
     request(`/api/stats/similari/${idClient}?topN=${topN}`),
-  getActoriFilm: (idFilm) => request(`/api/actori/film/${idFilm}`)
+  getActoriFilm: (idFilm) => request(`/api/actori/film/${idFilm}`),
+  getStatsSezon: () => request('/api/stats/sezon'),
+  getPredictii: (luna, topN = 10) => request(`/api/stats/predictii?luna=${luna}&topN=${topN}`),
+  getGrupare: (threshold) => request(`/api/stats/grupare?threshold=${threshold}`),
+  getMe: (username) => request(`/api/clienti/me?username=${encodeURIComponent(username)}`),
+  updateMe: (username, data) =>
+    request(`/api/clienti/me?username=${encodeURIComponent(username)}`, {
+      method: 'PUT',
+      body: JSON.stringify(data)
+    })
 };
-
-
-

@@ -41,6 +41,16 @@ public class GlobalExceptionHandler {
                 return ResponseEntity.badRequest()
                         .body(Map.of("error", sqlEx.getMessage()));
             }
+            if (code == 20100 || code == 20101) {
+                // ORA-20100: nota/text invalid, ORA-20101: array-uri nepotrivite
+                return ResponseEntity.badRequest()
+                        .body(Map.of("error", sqlEx.getMessage()));
+            }
+            if (code == 20102 || code == 20103) {
+                // ORA-20102: client inexistent, ORA-20103: film inexistent
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(Map.of("error", sqlEx.getMessage()));
+            }
             if (code == 2290) {
                 // ORA-02290: check constraint violated
                 return ResponseEntity.badRequest()

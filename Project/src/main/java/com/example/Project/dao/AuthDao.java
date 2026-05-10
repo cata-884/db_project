@@ -6,10 +6,14 @@ import com.example.Project.model.client.PhoneNumber;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
+import java.sql.PreparedStatement;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Repository
@@ -57,5 +61,36 @@ public class AuthDao {
                      "FROM clienti WHERE username = ? AND parola = ?";
         List<Client> results = jdbcTemplate.query(sql, CLIENT_MAPPER, username, parola);
         return results.stream().findFirst();
+    }
+
+    public Optional<Client> findByUsername(String username) {
+        String sql = "SELECT id, nume, prenume, telefon_fix_cod, telefon_fix_nr, adresa, oras, email, " +
+                     "telefon_mobil_cod, telefon_mobil_nr, data_nastere, username, parola " +
+                     "FROM clienti WHERE username = ?";
+        List<Client> results = jdbcTemplate.query(sql, CLIENT_MAPPER, username);
+        return results.stream().findFirst();
+    }
+
+    public Optional<Client> findById(Long id) {
+        String sql = "SELECT id, nume, prenume, telefon_fix_cod, telefon_fix_nr, adresa, oras, email, " +
+                     "telefon_mobil_cod, telefon_mobil_nr, data_nastere, username, parola " +
+                     "FROM clienti WHERE id = ?";
+        List<Client> results = jdbcTemplate.query(sql, CLIENT_MAPPER, id);
+        return results.stream().findFirst();
+    }
+
+    public Long insertBasicClient(String nume, String prenume, String email, String username, String parola) {
+        String sql = "INSERT INTO clienti (nume, prenume, email, username, parola) VALUES (?, ?, ?, ?, ?)";
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+        jdbcTemplate.update(con -> {
+            PreparedStatement ps = con.prepareStatement(sql, new String[]{"id"});
+            ps.setString(1, nume);
+            ps.setString(2, prenume);
+            ps.setString(3, email);
+            ps.setString(4, username);
+            ps.setString(5, parola);
+            return ps;
+        }, keyHolder);
+        return Objects.requireNonNull(keyHolder.getKey()).longValue();
     }
 }

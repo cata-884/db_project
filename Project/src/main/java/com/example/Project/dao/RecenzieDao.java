@@ -1,19 +1,30 @@
 package com.example.Project.dao;
 
 import com.example.Project.dto.request.UpdateRecenzieRequest;
+import com.example.Project.dto.response.ComentariuActorDto;
 import com.example.Project.dto.response.RecenzieDetailResponse;
 import com.example.Project.dto.response.RecenzieResponse;
 import com.example.Project.model.recenzie.Recenzii;
+import oracle.jdbc.OracleConnection;
+import org.springframework.jdbc.core.ConnectionCallback;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
+import java.sql.Array;
+import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
+import java.sql.Types;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Repository
 public class RecenzieDao {
@@ -46,7 +57,9 @@ public class RecenzieDao {
                 nota,
                 rs.getString("sentiment"),
                 rs.getString("text_comentariu"),
-                rs.getTimestamp("data_postare") != null ? rs.getTimestamp("data_postare").toLocalDateTime() : null
+                rs.getTimestamp("data_postare") != null ? rs.getTimestamp("data_postare").toLocalDateTime() : null,
+                new ArrayList<>(),
+                new ArrayList<>()
         );
     };
 
@@ -108,9 +121,45 @@ public class RecenzieDao {
     }
 
     public List<RecenzieDetailResponse> findByFilmId(Long idFilm) {
-        return jdbcTemplate.query(
+        List<RecenzieDetailResponse> reviews = jdbcTemplate.query(
                 DETAIL_SELECT + "WHERE r.id_film = ? ORDER BY r.data_postare DESC",
                 DETAIL_MAPPER, idFilm);
+
+        if (reviews.isEmpty()) return reviews;
+
+        String idList = reviews.stream()
+                .map(r -> r.getId().toString())
+                .collect(Collectors.joining(","));
+
+        String sql = "SELECT re.id_recenzie, e.denumire " +
+                     "FROM recenzii_etichete re JOIN etichete e ON re.id_eticheta = e.id " +
+                     "WHERE re.id_recenzie IN (" + idList + ")";
+
+        Map<Long, List<String>> eticheteMap = new HashMap<>();
+        jdbcTemplate.query(sql, rs -> {
+            Long idRec = rs.getLong("id_recenzie");
+            String denumire = rs.getString("denumire");
+            eticheteMap.computeIfAbsent(idRec, k -> new ArrayList<>()).add(denumire);
+        });
+
+        reviews.forEach(r -> r.setEtichete(eticheteMap.getOrDefault(r.getId(), Collections.emptyList())));
+
+        String actoriSql = "SELECT ra.id_recenzie, a.nume_scena, ra.comentariu " +
+                           "FROM recenzii_actori ra JOIN actori a ON ra.id_actor = a.id " +
+                           "WHERE ra.id_recenzie IN (" + idList + ")";
+
+        Map<Long, List<ComentariuActorDto>> actoriMap = new HashMap<>();
+        jdbcTemplate.query(actoriSql, rs -> {
+            Long idRec = rs.getLong("id_recenzie");
+            ComentariuActorDto dto = new ComentariuActorDto(
+                    rs.getString("nume_scena"),
+                    rs.getString("comentariu"));
+            actoriMap.computeIfAbsent(idRec, k -> new ArrayList<>()).add(dto);
+        });
+
+        reviews.forEach(r -> r.setActoriComentarii(actoriMap.getOrDefault(r.getId(), Collections.emptyList())));
+
+        return reviews;
     }
 
     public List<RecenzieResponse> findByClientId(Long idClient) {
@@ -118,5 +167,36 @@ public class RecenzieDao {
                 "SELECT id, id_client, id_film, nota, sentiment, text_comentariu, data_postare " +
                 "FROM recenzii WHERE id_client = ? ORDER BY data_postare DESC",
                 RESPONSE_MAPPER, idClient);
+    }
+
+    public Long creeazaRecenzieCompleta(
+            Long idClient, Long idFilm, Integer nota, String textComentariu,
+            List<Long> etichetaIds, List<Long> actoriIds, List<String> actoriComentarii) {
+
+        return jdbcTemplate.execute((ConnectionCallback<Long>) conn -> {
+            OracleConnection oc = conn.unwrap(OracleConnection.class);
+
+            Long[] eArr = etichetaIds == null ? new Long[0] : etichetaIds.toArray(new Long[0]);
+            Long[] aIdArr = actoriIds == null ? new Long[0] : actoriIds.toArray(new Long[0]);
+            String[] aComArr = actoriComentarii == null ? new String[0] : actoriComentarii.toArray(new String[0]);
+
+            Array etichetaArray = oc.createOracleArray("SYS.ODCINUMBERLIST", eArr);
+            Array actoriIdArray = oc.createOracleArray("SYS.ODCINUMBERLIST", aIdArr);
+            Array actoriComArray = oc.createOracleArray("SYS.ODCIVARCHAR2LIST", aComArr);
+
+            try (CallableStatement cs = conn.prepareCall(
+                    "{call p_creeaza_recenzie_completa(?,?,?,?,?,?,?,?)}")) {
+                cs.setLong(1, idClient);
+                cs.setLong(2, idFilm);
+                cs.setInt(3, nota);
+                cs.setString(4, textComentariu);
+                cs.setArray(5, etichetaArray);
+                cs.setArray(6, actoriIdArray);
+                cs.setArray(7, actoriComArray);
+                cs.registerOutParameter(8, Types.NUMERIC);
+                cs.execute();
+                return cs.getLong(8);
+            }
+        });
     }
 }

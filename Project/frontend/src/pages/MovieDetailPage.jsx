@@ -17,6 +17,7 @@ function MovieDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [showPlayer, setShowPlayer] = useState(false);
+  const [selectedVersionId, setSelectedVersionId] = useState(null);
 
   const loadAll = async () => {
     setLoading(true);
@@ -34,6 +35,7 @@ function MovieDetailPage() {
       setReviews(reviewData || []);
       setCategorii(categoriiData || []);
       setVersiuni(versiuniData || []);
+      if (versiuniData && versiuniData.length > 0) setSelectedVersionId(versiuniData[0].id);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -46,7 +48,7 @@ function MovieDetailPage() {
   }, [id]);
 
   const handleVizionare = () => {
-    if (!user || !versiuni[0]?.id) return;
+    if (!user || !selectedVersionId) return;
     setShowPlayer(true);
   };
 
@@ -55,7 +57,6 @@ function MovieDetailPage() {
   if (!movie) return <div className="text-muted">Film inexistent.</div>;
 
   const categorieName = categorii.find((c) => c.id === (movie.idCategorie || movie.id_categorie))?.nume;
-  const idVersiune = versiuni[0]?.id;
 
   return (
     <div className="row g-4">
@@ -68,12 +69,25 @@ function MovieDetailPage() {
             <span>Data lansare: {movie.dataLansare || movie.data_lansare || '-'}</span>
             <span>Categorie: {categorieName || '-'}</span>
           </div>
-          {user && (
-            <button className="btn btn-success mt-3" onClick={handleVizionare} disabled={!idVersiune}>
-              Vizioneaza
-            </button>
+          {user && versiuni.length > 0 && (
+            <div className="d-flex align-items-center gap-2 mt-3">
+              <select
+                className="form-select w-auto"
+                value={selectedVersionId || ''}
+                onChange={(e) => setSelectedVersionId(Number(e.target.value))}
+              >
+                {versiuni.map((v) => (
+                  <option key={v.id} value={v.id}>
+                    {v.rezolutie} &bull; {v.limbi} &bull; {v.format}
+                  </option>
+                ))}
+              </select>
+              <button className="btn btn-success" onClick={handleVizionare}>
+                Vizioneaza
+              </button>
+            </div>
           )}
-          {user && !idVersiune && (
+          {user && versiuni.length === 0 && (
             <div className="text-muted small mt-2">Nu exista versiuni pentru acest film.</div>
           )}
         </div>
@@ -106,6 +120,7 @@ function MovieDetailPage() {
             idFilm={movie.id}
             idClient={user.id}
             existingReview={reviews.find((r) => r.idClient === user.id || r.id_client === user.id) ?? null}
+            distributie={actors}
             onSubmitted={loadAll}
           />
         )}
@@ -124,7 +139,7 @@ function MovieDetailPage() {
         <VideoPlayerModal
           movie={movie}
           idClient={user.id}
-          idVersiune={idVersiune}
+          idVersiune={selectedVersionId}
           onClose={() => setShowPlayer(false)}
         />
       )}

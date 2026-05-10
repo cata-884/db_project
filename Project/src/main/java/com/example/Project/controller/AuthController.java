@@ -1,6 +1,7 @@
 package com.example.Project.controller;
 
 import com.example.Project.dto.LoginRequest;
+import com.example.Project.dto.request.RegisterRequest;
 import com.example.Project.dto.response.LoginResponse;
 import com.example.Project.service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,5 +17,10 @@ public class AuthController {
     @PostMapping("/login")
     public LoginResponse login(@RequestBody LoginRequest req) {
         return authService.login(req.getUsername(), req.getParola());
+    }
+
+    @PostMapping("/register")
+    public LoginResponse register(@RequestBody RegisterRequest req) {
+        return authService.register(req.getUsername(), req.getParola(), req.getNume(), req.getPrenume(), req.getEmail());
     }
 }

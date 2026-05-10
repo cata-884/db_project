@@ -2,11 +2,12 @@ import { useEffect, useState } from 'react';
 import { api } from '../api.js';
 import EticheteSelector from './EticheteSelector.jsx';
 
-function ReviewForm({ idFilm, idClient, existingReview, onSubmitted }) {
+function ReviewForm({ idFilm, idClient, existingReview, distributie = [], onSubmitted }) {
   const [nota, setNota] = useState(existingReview?.nota ?? 8);
   const [textComentariu, setTextComentariu] = useState(existingReview?.textComentariu ?? '');
   const [etichete, setEtichete] = useState([]);
   const [selected, setSelected] = useState(new Set());
+  const [actoriComentarii, setActoriComentarii] = useState({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -32,29 +33,46 @@ function ReviewForm({ idFilm, idClient, existingReview, onSubmitted }) {
     setSelected(copy);
   };
 
+  const handleActorComment = (idActor, value) => {
+    setActoriComentarii((prev) => ({ ...prev, [idActor]: value }));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setLoading(true);
     try {
-      let recenzie;
-      if (existingReview?.id) {
-        recenzie = await api.updateRecenzie(existingReview.id, {
+      const isEdit = !!existingReview?.id;
+
+      if (isEdit) {
+        await api.updateRecenzie(existingReview.id, {
           nota: Number(nota),
           textComentariu
         });
+        // adauga etichete noi selectate (duplicate ignorate de backend)
+        for (const idEticheta of selected) {
+          try { await api.addEticheta(existingReview.id, idEticheta); } catch { /* ignore duplicates */ }
+        }
       } else {
-        recenzie = await api.postRecenzie({ idClient, idFilm, nota: Number(nota), textComentariu });
+        const actoriIds = Object.keys(actoriComentarii)
+          .filter((k) => actoriComentarii[k].trim() !== '')
+          .map(Number);
+        const actoriCom = actoriIds.map((id) => actoriComentarii[id]);
+
+        await api.postRecenzie({
+          idClient,
+          idFilm,
+          nota: Number(nota),
+          textComentariu,
+          etichetaIds: [...selected],
+          actoriIds,
+          actoriComentarii: actoriCom,
+        });
       }
 
-      const idRecenzie = recenzie?.id || recenzie?.idRecenzie;
-      if (idRecenzie && !existingReview?.id) {
-        for (const idEticheta of selected) {
-          await api.addEticheta(idRecenzie, idEticheta);
-        }
-      }
       setTextComentariu('');
       setSelected(new Set());
+      setActoriComentarii({});
       if (onSubmitted) onSubmitted();
     } catch (err) {
       const message = err.message || 'Eroare la trimiterea recenziei.';
@@ -75,6 +93,7 @@ function ReviewForm({ idFilm, idClient, existingReview, onSubmitted }) {
     <form onSubmit={handleSubmit} className="card card-body">
       <h5 className="mb-3">{isEditMode ? 'Editeaza recenzia' : 'Adauga o recenzie'}</h5>
       {error && <div className="alert alert-danger">{error}</div>}
+
       <div className="mb-3">
         <label className="form-label">Nota (1-10)</label>
         <input
@@ -86,6 +105,7 @@ function ReviewForm({ idFilm, idClient, existingReview, onSubmitted }) {
           onChange={(e) => setNota(e.target.value)}
         />
       </div>
+
       <div className="mb-3">
         <label className="form-label">Comentariu</label>
         <textarea
@@ -96,10 +116,35 @@ function ReviewForm({ idFilm, idClient, existingReview, onSubmitted }) {
         />
       </div>
 
-      {!isEditMode && (
+      <div className="mb-3">
+        <label className="form-label">Etichete</label>
+        <EticheteSelector etichete={etichete} selected={selected} onToggle={toggle} />
+      </div>
+
+      {!isEditMode && distributie.length > 0 && (
         <div className="mb-3">
-          <label className="form-label">Etichete</label>
-          <EticheteSelector etichete={etichete} selected={selected} onToggle={toggle} />
+          <label className="form-label">Comentarii despre actori (optional)</label>
+          <div className="list-group">
+            {distributie.map((actor) => (
+              <div key={actor.idActor || actor.id_actor} className="list-group-item py-2">
+                <label className="form-label mb-1 small fw-bold">
+                  {actor.numeScena || actor.nume_scena}{' '}
+                  <span className="text-muted fw-normal">
+                    {actor.nume} {actor.prenume} — {actor.rol}
+                  </span>
+                </label>
+                <input
+                  type="text"
+                  className="form-control form-control-sm"
+                  placeholder="Comentariu optional..."
+                  value={actoriComentarii[actor.idActor || actor.id_actor] || ''}
+                  onChange={(e) =>
+                    handleActorComment(actor.idActor || actor.id_actor, e.target.value)
+                  }
+                />
+              </div>
+            ))}
+          </div>
         </div>
       )}
 

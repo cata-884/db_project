@@ -288,4 +288,95 @@ SHOW ERRORS;
 -- PRINT rc;
 --
 -- EXEC p_analiza_sezoniera(:rc);
+
+-- Creeaza o recenzie completa (recenzie + etichete + comentarii per actor) atomic.
+-- Coduri erori proprii: -20100 (nota/text invalid), -20101 (array-uri nepotrivite),
+-- -20102 (client inexistent), -20103 (film inexistent).
+-- Triggerul trg_validare_actor_recenzie propaga -20001 daca actorul nu e in distributie.
+-- Triggerul trg_set_sentiment_recenzie seteaza automat sentiment la INSERT.
+CREATE OR REPLACE PROCEDURE p_creeaza_recenzie_completa(
+    p_id_client          IN  NUMBER,
+    p_id_film            IN  NUMBER,
+    p_nota               IN  NUMBER,
+    p_text_comentariu    IN  VARCHAR2,
+    p_etichete_ids       IN  SYS.ODCINUMBERLIST   DEFAULT SYS.ODCINUMBERLIST(),
+    p_actori_ids         IN  SYS.ODCINUMBERLIST   DEFAULT SYS.ODCINUMBERLIST(),
+    p_actori_comentarii  IN  SYS.ODCIVARCHAR2LIST DEFAULT SYS.ODCIVARCHAR2LIST(),
+    p_id_recenzie        OUT NUMBER
+) IS
+    v_count NUMBER;
+    e_input_invalid      EXCEPTION;
+    e_arrays_nepotrivite EXCEPTION;
+    e_client_inexistent  EXCEPTION;
+    e_film_inexistent    EXCEPTION;
+BEGIN
+    -- 1. Validare argumente inainte de orice INSERT
+    IF p_nota IS NULL OR p_nota < 1 OR p_nota > 10 THEN
+        RAISE e_input_invalid;
+    END IF;
+
+    IF p_text_comentariu IS NULL OR LENGTH(TRIM(p_text_comentariu)) = 0 THEN
+        RAISE e_input_invalid;
+    END IF;
+
+    IF p_actori_ids.COUNT != p_actori_comentarii.COUNT THEN
+        RAISE e_arrays_nepotrivite;
+    END IF;
+
+    SELECT COUNT(*) INTO v_count FROM clienti WHERE id = p_id_client;
+    IF v_count = 0 THEN RAISE e_client_inexistent; END IF;
+
+    SELECT COUNT(*) INTO v_count FROM filme WHERE id = p_id_film;
+    IF v_count = 0 THEN RAISE e_film_inexistent; END IF;
+
+    -- 2. Savepoint pentru atomicitate (defense in depth fata de apeluri directe SQL*Plus)
+    SAVEPOINT sp_recenzie;
+
+    -- 3. Insert recenzie; trg_set_sentiment_recenzie populeaza automat coloana sentiment
+    INSERT INTO recenzii (id_client, id_film, nota, text_comentariu, data_postare)
+    VALUES (p_id_client, p_id_film, p_nota, p_text_comentariu, SYSDATE)
+    RETURNING id INTO p_id_recenzie;
+
+    -- 4. Insert etichete; duplicate ignorate (DUP_VAL_ON_INDEX)
+    IF p_etichete_ids.COUNT > 0 THEN
+        FOR i IN 1 .. p_etichete_ids.COUNT LOOP
+            BEGIN
+                INSERT INTO recenzii_etichete(id_recenzie, id_eticheta)
+                VALUES (p_id_recenzie, p_etichete_ids(i));
+            EXCEPTION
+                WHEN DUP_VAL_ON_INDEX THEN NULL;
+            END;
+        END LOOP;
+    END IF;
+
+    -- 5. Insert comentarii per actor; trg_validare_actor_recenzie (-20001)
+    --    valideaza ca actorul apartine distributiei filmului
+    IF p_actori_ids.COUNT > 0 THEN
+        FOR i IN 1 .. p_actori_ids.COUNT LOOP
+            IF p_actori_comentarii(i) IS NOT NULL
+               AND LENGTH(TRIM(p_actori_comentarii(i))) > 0 THEN
+                INSERT INTO recenzii_actori(id_recenzie, id_actor, comentariu)
+                VALUES (p_id_recenzie, p_actori_ids(i), p_actori_comentarii(i));
+            END IF;
+        END LOOP;
+    END IF;
+
+EXCEPTION
+    WHEN e_input_invalid THEN
+        RAISE_APPLICATION_ERROR(-20100,
+            'Date invalide: nota trebuie 1-10 si comentariul nu poate fi gol');
+    WHEN e_arrays_nepotrivite THEN
+        RAISE_APPLICATION_ERROR(-20101,
+            'Numarul de id-uri actori nu corespunde cu numarul de comentarii');
+    WHEN e_client_inexistent THEN
+        RAISE_APPLICATION_ERROR(-20102,
+            'Clientul cu id ' || p_id_client || ' nu exista');
+    WHEN e_film_inexistent THEN
+        RAISE_APPLICATION_ERROR(-20103,
+            'Filmul cu id ' || p_id_film || ' nu exista');
+    WHEN OTHERS THEN
+        ROLLBACK TO sp_recenzie;
+        RAISE;
+END p_creeaza_recenzie_completa;
+/
 -- PRINT rc;

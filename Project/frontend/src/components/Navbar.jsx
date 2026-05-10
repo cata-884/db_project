@@ -30,6 +30,20 @@ function Navbar() {
                 </Link>
               </li>
             )}
+            {user && (
+              <li className="nav-item">
+                <Link className="nav-link" to="/stats">
+                  Statistici
+                </Link>
+              </li>
+            )}
+            {user && (
+              <li className="nav-item">
+                <Link className="nav-link" to="/account">
+                  Contul meu
+                </Link>
+              </li>
+            )}
           </ul>
           <div className="d-flex align-items-center gap-2">
             {user ? (

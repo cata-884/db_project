@@ -4,6 +4,8 @@ import LoginPage from './pages/LoginPage.jsx';
 import MoviesPage from './pages/MoviesPage.jsx';
 import MovieDetailPage from './pages/MovieDetailPage.jsx';
 import ProfilePage from './pages/ProfilePage.jsx';
+import StatsPage from './pages/StatsPage.jsx';
+import AccountPage from './pages/AccountPage.jsx';
 import { auth } from './auth.js';
 
 function ProtectedRoute({ children }) {
@@ -25,6 +27,22 @@ function App() {
             element={
               <ProtectedRoute>
                 <ProfilePage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/stats"
+            element={
+              <ProtectedRoute>
+                <StatsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/account"
+            element={
+              <ProtectedRoute>
+                <AccountPage />
               </ProtectedRoute>
             }
           />
