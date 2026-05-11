@@ -2,6 +2,7 @@ package com.example.Project.service;
 
 import com.example.Project.dao.SesiuneDao;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -22,5 +23,10 @@ public class SesiuneService {
 
     public void invalideazaToken(String token) {
         sesiuneDao.sterge(token);
+    }
+
+    @Scheduled(cron = "0 0 * * * *")
+    public void cleanupExpirate() {
+        sesiuneDao.curataExpirate();
     }
 }

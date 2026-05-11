@@ -4,6 +4,7 @@ import com.example.Project.dao.AuthDao;
 import com.example.Project.dto.response.LoginResponse;
 import com.example.Project.model.client.Client;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -15,14 +16,20 @@ public class AuthService {
     @Autowired
     private SesiuneService sesiuneService;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     public LoginResponse login(String username, String parola) {
         if (username == null || username.isBlank())
             throw new IllegalArgumentException("Username-ul este obligatoriu");
         if (parola == null || parola.isBlank())
             throw new IllegalArgumentException("Parola este obligatorie");
 
-        Client client = authDao.findByUsernameAndPassword(username, parola)
+        Client client = authDao.findByUsername(username)
                 .orElseThrow(() -> new IllegalArgumentException("Username sau parola incorecte"));
+        if (!passwordEncoder.matches(parola, client.getParola())) {
+            throw new IllegalArgumentException("Username sau parola incorecte");
+        }
 
         String token = sesiuneService.creeazaTokenPentru(client.getId());
 
@@ -45,7 +52,7 @@ public class AuthService {
         }
 
         Long id = authDao.insertBasicClient(nume, prenume, (email == null || email.isBlank()) ? null : email,
-                username, parola);
+                username, passwordEncoder.encode(parola));
 
         String token = sesiuneService.creeazaTokenPentru(id);
 

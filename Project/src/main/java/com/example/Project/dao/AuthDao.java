@@ -55,14 +55,6 @@ public class AuthDao {
                 .orElse(CountryCode.OTHER);
     }
 
-    public Optional<Client> findByUsernameAndPassword(String username, String parola) {
-        String sql = "SELECT id, nume, prenume, telefon_fix_cod, telefon_fix_nr, adresa, oras, email, " +
-                     "telefon_mobil_cod, telefon_mobil_nr, data_nastere, username, parola " +
-                     "FROM clienti WHERE username = ? AND parola = ?";
-        List<Client> results = jdbcTemplate.query(sql, CLIENT_MAPPER, username, parola);
-        return results.stream().findFirst();
-    }
-
     public Optional<Client> findByUsername(String username) {
         String sql = "SELECT id, nume, prenume, telefon_fix_cod, telefon_fix_nr, adresa, oras, email, " +
                      "telefon_mobil_cod, telefon_mobil_nr, data_nastere, username, parola " +

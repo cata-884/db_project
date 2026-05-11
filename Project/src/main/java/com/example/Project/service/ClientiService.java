@@ -34,24 +34,9 @@ public class ClientiService {
         return getById(id);
     }
 
-    /** Pastrare backward-compat pentru alte utilizari interne */
-    public ClientResponse getMe(String username) {
-        Client c = authDao.findByUsername(username)
-                .orElseThrow(() -> new NotFoundException("Client negasit: " + username));
-        return toResponse(c);
-    }
-
-    @Transactional
-    public ClientResponse updateMe(String username, UpdateClientRequest req) {
-        Client c = authDao.findByUsername(username)
-                .orElseThrow(() -> new NotFoundException("Client negasit: " + username));
-        clientiDao.update(c.getId(), req);
-        return getMe(username);
-    }
-
     private ClientResponse toResponse(Client c) {
-        PhoneNumber homePhone = c.getHomePhone();
-        PhoneNumber cellPhone = c.getCellphone();
+        PhoneNumber homePhone = c.getTelefonFix();
+        PhoneNumber cellPhone = c.getTelefonMobil();
         String homeCode = homePhone != null ? homePhone.getCode().getPrefix() : null;
         String homeNr = homePhone != null ? homePhone.getNumber() : null;
         String cellCode = cellPhone != null ? cellPhone.getCode().getPrefix() : null;
@@ -69,8 +54,8 @@ public class ClientiService {
                 cellNr,
                 formatPhone(homePhone),
                 formatPhone(cellPhone),
-                c.getAddress(),
-                c.getCity(),
+                c.getAdresa(),
+                c.getOras(),
                 c.getDataNastere()
         );
     }

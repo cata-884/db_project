@@ -2,8 +2,10 @@ package com.example.Project.controller;
 
 import com.example.Project.config.CurrentUser;
 import com.example.Project.dto.request.CreateVizualizareRequest;
+import com.example.Project.dto.request.UpdateVizualizareRequest;
 import com.example.Project.dto.response.IstoricVizionareResponse;
 import com.example.Project.model.client.Vizualizari;
+import com.example.Project.service.OwnershipService;
 import com.example.Project.service.VizualizareService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,29 +22,37 @@ public class VizualizareController {
     @Autowired
     private VizualizareService vizualizareService;
 
+    @Autowired
+    private OwnershipService ownershipService;
+
     @GetMapping
     public List<Vizualizari> getAll() {
         return vizualizareService.getAll();
     }
 
     @GetMapping("/{id}")
-    public Vizualizari getById(@PathVariable Long id) {
+    public Vizualizari getById(HttpServletRequest req, @PathVariable Long id) {
+        ownershipService.verificaVizualizare(id, CurrentUser.getId(req));
         return vizualizareService.getById(id);
     }
 
     @PostMapping
     public ResponseEntity<Vizualizari> create(HttpServletRequest req, @RequestBody CreateVizualizareRequest body) {
-        body.setIdClient(CurrentUser.getId(req));
-        return ResponseEntity.status(HttpStatus.CREATED).body(vizualizareService.create(body));
+        Long idClient = CurrentUser.getId(req);
+        return ResponseEntity.status(HttpStatus.CREATED).body(vizualizareService.create(idClient, body));
     }
 
     @PutMapping("/{id}")
-    public Vizualizari update(@PathVariable Long id, @RequestBody Vizualizari viz) {
-        return vizualizareService.update(id, viz);
+    public Vizualizari update(HttpServletRequest req,
+                              @PathVariable Long id,
+                              @RequestBody UpdateVizualizareRequest body) {
+        ownershipService.verificaVizualizare(id, CurrentUser.getId(req));
+        return vizualizareService.updateProgress(id, body);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
+    public ResponseEntity<Void> delete(HttpServletRequest req, @PathVariable Long id) {
+        ownershipService.verificaVizualizare(id, CurrentUser.getId(req));
         vizualizareService.delete(id);
         return ResponseEntity.noContent().build();
     }

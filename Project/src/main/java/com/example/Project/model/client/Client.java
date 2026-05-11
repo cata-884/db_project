@@ -11,14 +11,13 @@ public class Client {
     private Long id;
     private String nume;
     private String prenume;
-    private PhoneNumber homePhone;
-    private String address;
-    private String city;
+    private PhoneNumber telefonFix;
+    private String adresa;
+    private String oras;
     private String email;
-    private PhoneNumber cellphone;
+    private PhoneNumber telefonMobil;
     private LocalDate dataNastere;
 
     private String username;
     private String parola;
-
 }

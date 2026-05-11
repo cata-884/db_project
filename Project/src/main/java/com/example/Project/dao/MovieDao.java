@@ -21,14 +21,18 @@ public class MovieDao {
 
     // NOTA: la orice ORDER BY pe rating sau alte coloane nullable, foloseste NULLS LAST
     //       in Oracle DESC pune NULL-urile primele, ceea ce nu e ce vrem
-    private static final RowMapper<Movie> ROW_MAPPER = (rs, rowNum) -> new Movie(
-            rs.getLong("id"),
-            rs.getString("titlu"),
-            rs.getString("descriere"),
-            rs.getDate("data_lansare") != null ? rs.getDate("data_lansare").toLocalDate() : null,
-            rs.getLong("id_categorie"),
-            rs.getDouble("rating")
-    );
+    private static final RowMapper<Movie> ROW_MAPPER = (rs, rowNum) -> {
+        Object ratingObj = rs.getObject("rating");
+        Double rating = ratingObj != null ? ((Number) ratingObj).doubleValue() : null;
+        return new Movie(
+                rs.getLong("id"),
+                rs.getString("titlu"),
+                rs.getString("descriere"),
+                rs.getDate("data_lansare") != null ? rs.getDate("data_lansare").toLocalDate() : null,
+                rs.getLong("id_categorie"),
+                rating
+        );
+    };
 
     public List<Movie> findAll() {
         return jdbcTemplate.query(

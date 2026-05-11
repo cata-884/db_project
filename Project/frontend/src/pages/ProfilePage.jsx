@@ -3,6 +3,21 @@ import { useNavigate } from 'react-router-dom';
 import { api } from '../api.js';
 import MovieCard from '../components/MovieCard.jsx';
 
+function stareColor(stare) {
+  switch (stare) {
+    case 'COMPLETED':
+      return 'success';
+    case 'IN_PROGRESS':
+      return 'primary';
+    case 'PAUSED':
+      return 'warning';
+    case 'ABANDONED':
+      return 'secondary';
+    default:
+      return 'light';
+  }
+}
+
 function ProfilePage() {
   const navigate = useNavigate();
   const [profil, setProfil] = useState(null);
@@ -104,6 +119,8 @@ function ProfilePage() {
                     <th>Titlu</th>
                     <th>Versiune</th>
                     <th>Data</th>
+                    <th>Stare</th>
+                    <th>Durata</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -112,6 +129,10 @@ function ProfilePage() {
                       <td>{v.titluFilm || '-'}</td>
                       <td>{v.denumireVersiune || '-'}</td>
                       <td>{v.dataVizualizare || '-'}</td>
+                      <td>
+                        <span className={`badge bg-${stareColor(v.stare)}`}>{v.stare || '-'}</span>
+                      </td>
+                      <td>{v.durata != null ? `${v.durata} min` : '-'}</td>
                     </tr>
                   ))}
                 </tbody>

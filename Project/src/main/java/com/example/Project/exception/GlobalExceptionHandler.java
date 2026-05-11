@@ -21,6 +21,11 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", ex.getMessage()));
     }
 
+    @ExceptionHandler(ForbiddenException.class)
+    public ResponseEntity<Map<String, String>> handleForbidden(ForbiddenException ex) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error", ex.getMessage()));
+    }
+
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<Map<String, String>> handleRuntime(RuntimeException ex) {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", ex.getMessage()));
@@ -49,6 +54,11 @@ public class GlobalExceptionHandler {
             if (code == 20102 || code == 20103) {
                 // ORA-20102: client inexistent, ORA-20103: film inexistent
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(Map.of("error", sqlEx.getMessage()));
+            }
+            if (code == 20104) {
+                // ORA-20104: recenzie duplicata pentru acelasi client/film
+                return ResponseEntity.status(HttpStatus.CONFLICT)
                         .body(Map.of("error", sqlEx.getMessage()));
             }
             if (code == 2290) {

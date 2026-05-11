@@ -374,9 +374,17 @@ EXCEPTION
     WHEN e_film_inexistent THEN
         RAISE_APPLICATION_ERROR(-20103,
             'Filmul cu id ' || p_id_film || ' nu exista');
+    WHEN DUP_VAL_ON_INDEX THEN
+        IF SQLERRM LIKE '%UQ_RECENZIE_CLIENT_FILM%' THEN
+            RAISE_APPLICATION_ERROR(-20104,
+                'Exista deja o recenzie de la acest client pentru acest film');
+        ELSE
+            RAISE;
+        END IF;
     WHEN OTHERS THEN
         ROLLBACK TO sp_recenzie;
         RAISE;
 END p_creeaza_recenzie_completa;
 /
 -- PRINT rc;
+

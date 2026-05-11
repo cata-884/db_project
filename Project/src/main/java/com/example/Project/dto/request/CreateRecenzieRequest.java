@@ -8,7 +8,6 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 public class CreateRecenzieRequest {
-    private Long idClient;
     private Long idFilm;
     private Integer nota;
     private String textComentariu;

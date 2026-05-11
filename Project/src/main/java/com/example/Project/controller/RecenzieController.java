@@ -5,6 +5,7 @@ import com.example.Project.dto.request.CreateRecenzieRequest;
 import com.example.Project.dto.request.UpdateRecenzieRequest;
 import com.example.Project.dto.response.RecenzieDetailResponse;
 import com.example.Project.dto.response.RecenzieResponse;
+import com.example.Project.service.OwnershipService;
 import com.example.Project.service.RecenzieService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +21,9 @@ public class RecenzieController {
 
     @Autowired
     private RecenzieService recenzieService;
+
+    @Autowired
+    private OwnershipService ownershipService;
 
     @GetMapping
     public List<RecenzieResponse> getAll() {
@@ -39,12 +43,14 @@ public class RecenzieController {
     }
 
     @PutMapping("/{id}")
-    public RecenzieResponse update(@PathVariable Long id, @RequestBody UpdateRecenzieRequest req) {
+    public RecenzieResponse update(HttpServletRequest httpReq, @PathVariable Long id, @RequestBody UpdateRecenzieRequest req) {
+        ownershipService.verificaRecenzie(id, CurrentUser.getId(httpReq));
         return recenzieService.update(id, req);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
+    public ResponseEntity<Void> delete(HttpServletRequest req, @PathVariable Long id) {
+        ownershipService.verificaRecenzie(id, CurrentUser.getId(req));
         recenzieService.delete(id);
         return ResponseEntity.noContent().build();
     }

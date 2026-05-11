@@ -7,7 +7,7 @@ function MovieCard({movie, onClick}) {
             {movie.descriere ? `${movie.descriere.substring(0, 100)}...` : 'Fara descriere'}
           </p>
           <div className="d-flex justify-content-between">
-            <small>⭐ {movie.rating?.toFixed?.(1) || movie.rating || 'N/A'}</small>
+            <small>⭐ {movie.rating != null ? movie.rating.toFixed(1) : 'N/A'}</small>
             <small>{movie.dataLansare || movie.data_lansare || ''}</small>
           </div>
         </div>

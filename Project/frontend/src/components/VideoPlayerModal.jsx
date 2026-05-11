@@ -16,7 +16,7 @@ function formatTimeFromPercent(percent) {
   return `${min}:${sec.toString().padStart(2, '0')}`;
 }
 
-function VideoPlayerModal({ movie, idClient, idVersiune, onClose }) {
+function VideoPlayerModal({ movie, idVersiune, onClose }) {
   const [progress, setProgress] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
   const [isDragging, setIsDragging] = useState(false);
@@ -34,7 +34,7 @@ function VideoPlayerModal({ movie, idClient, idVersiune, onClose }) {
     initRef.current = true;
     if (!idVersiune) return;
     try {
-      const res = await api.postVizualizare({ idClient, idVersiune });
+      const res = await api.postVizualizare({ idVersiune });
       const vizId = res?.id || res?.idVizualizare || res?.id_vizualizare;
       setIdVizualizare(vizId || null);
     } catch (err) {
@@ -62,9 +62,34 @@ function VideoPlayerModal({ movie, idClient, idVersiune, onClose }) {
     if (progress >= 100) setIsPlaying(false);
   }, [progress]);
 
+  const updateProgress = async (stareNoua = null) => {
+    if (!idVizualizare) return;
+    const minute = Math.floor((progress / 100) * SIM_DURATION_MINUTES);
+    try {
+      await api.updateVizualizare(idVizualizare, {
+        durata: minute,
+        stare: stareNoua
+      });
+    } catch {
+      // ignore
+    }
+  };
+
+  useEffect(() => {
+    if (!idVizualizare || !isPlaying || isDragging || progress >= 100) return undefined;
+    const syncTimer = setInterval(() => {
+      updateProgress();
+    }, 10000);
+    return () => clearInterval(syncTimer);
+  }, [idVizualizare, isPlaying, isDragging, progress]);
+
   const togglePlayPause = () => {
     if (progress >= 100) return;
-    setIsPlaying((prev) => !prev);
+    setIsPlaying((prev) => {
+      const next = !prev;
+      updateProgress(next ? 'IN_PROGRESS' : 'PAUSED');
+      return next;
+    });
   };
 
   const skipByPercent = (delta) => {
@@ -116,6 +141,20 @@ function VideoPlayerModal({ movie, idClient, idVersiune, onClose }) {
     };
   }, [isDragging, progress, wasPlayingBeforeDrag]);
 
+  useEffect(() => {
+    if (progress >= 100) {
+      updateProgress('COMPLETED');
+    }
+  }, [progress]);
+
+  const handleClose = async () => {
+    if (idVizualizare) {
+      const stareFinala = progress >= 90 ? 'COMPLETED' : 'ABANDONED';
+      await updateProgress(stareFinala);
+    }
+    onClose();
+  };
+
   const displayTime = `${formatTimeFromPercent(progress)} / ${formatTimeFromPercent(100)}`;
   const controlsDisabled = !idVizualizare || !idVersiune;
 
@@ -125,7 +164,7 @@ function VideoPlayerModal({ movie, idClient, idVersiune, onClose }) {
         <div className="modal-content" onClick={(e) => e.stopPropagation()}>
           <div className="modal-header">
             <h5 className="modal-title">{movie.titlu}</h5>
-            <button type="button" className="btn-close" onClick={onClose}></button>
+            <button type="button" className="btn-close" onClick={handleClose}></button>
           </div>
           <div className="modal-body">
             <div className="fake-player">
@@ -195,7 +234,7 @@ function VideoPlayerModal({ movie, idClient, idVersiune, onClose }) {
             {error && <div className="alert alert-danger mt-3">{error}</div>}
           </div>
           <div className="modal-footer">
-            <button className="btn btn-outline-danger" onClick={onClose}>
+            <button className="btn btn-outline-danger" onClick={handleClose}>
               Stop
             </button>
             <button className="btn btn-primary" onClick={() => { setProgress(100); setIsPlaying(false); }}>

@@ -23,7 +23,8 @@ public class ClientiController {
     }
 
     @PutMapping("/me")
-    public ClientResponse updateMe(HttpServletRequest req, @RequestBody UpdateClientRequest body) {
-        return clientiService.update(CurrentUser.getId(req), body);
+    public ClientResponse updateMe(HttpServletRequest req,
+                                   @RequestBody UpdateClientRequest request) {
+        return clientiService.update(CurrentUser.getId(req), request);
     }
 }

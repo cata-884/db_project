@@ -9,6 +9,8 @@ import oracle.jdbc.OracleConnection;
 import org.springframework.jdbc.core.ConnectionCallback;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
@@ -30,6 +32,7 @@ import java.util.stream.Collectors;
 public class RecenzieDao {
 
     private final JdbcTemplate jdbcTemplate;
+    private final NamedParameterJdbcTemplate namedJdbcTemplate;
 
     private static final RowMapper<RecenzieResponse> RESPONSE_MAPPER = (rs, rowNum) -> {
         Object notaObj = rs.getObject("nota");
@@ -70,8 +73,9 @@ public class RecenzieDao {
             "JOIN clienti c ON r.id_client = c.id " +
             "JOIN filme f ON r.id_film = f.id ";
 
-    public RecenzieDao(JdbcTemplate jdbcTemplate) {
+    public RecenzieDao(JdbcTemplate jdbcTemplate, NamedParameterJdbcTemplate namedJdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
+        this.namedJdbcTemplate = namedJdbcTemplate;
     }
 
     public List<RecenzieResponse> findAll() {
@@ -127,16 +131,18 @@ public class RecenzieDao {
 
         if (reviews.isEmpty()) return reviews;
 
-        String idList = reviews.stream()
-                .map(r -> r.getId().toString())
-                .collect(Collectors.joining(","));
+        List<Long> ids = reviews.stream()
+                .map(RecenzieDetailResponse::getId)
+                .collect(Collectors.toList());
+
+        MapSqlParameterSource params = new MapSqlParameterSource("ids", ids);
 
         String sql = "SELECT re.id_recenzie, e.denumire " +
                      "FROM recenzii_etichete re JOIN etichete e ON re.id_eticheta = e.id " +
-                     "WHERE re.id_recenzie IN (" + idList + ")";
+                     "WHERE re.id_recenzie IN (:ids)";
 
         Map<Long, List<String>> eticheteMap = new HashMap<>();
-        jdbcTemplate.query(sql, rs -> {
+        namedJdbcTemplate.query(sql, params, rs -> {
             Long idRec = rs.getLong("id_recenzie");
             String denumire = rs.getString("denumire");
             eticheteMap.computeIfAbsent(idRec, k -> new ArrayList<>()).add(denumire);
@@ -146,10 +152,10 @@ public class RecenzieDao {
 
         String actoriSql = "SELECT ra.id_recenzie, a.nume_scena, ra.comentariu " +
                            "FROM recenzii_actori ra JOIN actori a ON ra.id_actor = a.id " +
-                           "WHERE ra.id_recenzie IN (" + idList + ")";
+                           "WHERE ra.id_recenzie IN (:ids)";
 
         Map<Long, List<ComentariuActorDto>> actoriMap = new HashMap<>();
-        jdbcTemplate.query(actoriSql, rs -> {
+        namedJdbcTemplate.query(actoriSql, params, rs -> {
             Long idRec = rs.getLong("id_recenzie");
             ComentariuActorDto dto = new ComentariuActorDto(
                     rs.getString("nume_scena"),

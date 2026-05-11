@@ -15,4 +15,6 @@ public class Vizualizari {
     private Long idClient;
     private Long idVersiune;
     private LocalDate dataVizualizare;
+    private Integer durata;
+    private StareVizualizare stare;
 }

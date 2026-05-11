@@ -145,7 +145,6 @@ function MovieDetailPage() {
           return (
             <ReviewForm
               idFilm={movie.id}
-              idClient={user.id}
               distributie={actors}
               onSubmitted={loadAll}
             />
@@ -165,7 +164,6 @@ function MovieDetailPage() {
       {showPlayer && user && (
         <VideoPlayerModal
           movie={movie}
-          idClient={user.id}
           idVersiune={selectedVersionId}
           onClose={() => setShowPlayer(false)}
         />
@@ -175,4 +173,3 @@ function MovieDetailPage() {
 }
 
 export default MovieDetailPage;
-

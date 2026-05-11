@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { api } from '../api.js';
 import EticheteSelector from './EticheteSelector.jsx';
 
-function ReviewForm({ idFilm, idClient, distributie = [], onSubmitted }) {
+function ReviewForm({ idFilm, distributie = [], onSubmitted }) {
   const [nota, setNota] = useState(8);
   const [textComentariu, setTextComentariu] = useState('');
   const [etichete, setEtichete] = useState([]);
@@ -48,7 +48,6 @@ function ReviewForm({ idFilm, idClient, distributie = [], onSubmitted }) {
       const actoriCom = actoriIds.map((id) => actoriComentarii[id]);
 
       await api.postRecenzie({
-        idClient,
         idFilm,
         nota: Number(nota),
         textComentariu,
