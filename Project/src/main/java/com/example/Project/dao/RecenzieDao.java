@@ -28,12 +28,21 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+/**
+ * Componenta de acces la date (DAO) pentru entitatea Recenzie.
+ * Gestioneaza operatiile CRUD, interogari cu JOIN si apelul procedurii stocate Oracle
+ * {@code p_creeaza_recenzie_completa} pentru crearea atomica a recenziei cu etichete si comentarii actori.
+ */
 @Repository
 public class RecenzieDao {
 
     private final JdbcTemplate jdbcTemplate;
     private final NamedParameterJdbcTemplate namedJdbcTemplate;
 
+    /**
+     * Mapper pentru proiectia simpla a unei recenzii (fara JOIN cu clienti/filme).
+     * Coloana {@code nota} este tratata ca nullable.
+     */
     private static final RowMapper<RecenzieResponse> RESPONSE_MAPPER = (rs, rowNum) -> {
         Object notaObj = rs.getObject("nota");
         Integer nota = notaObj != null ? ((Number) notaObj).intValue() : null;
@@ -48,6 +57,10 @@ public class RecenzieDao {
         );
     };
 
+    /**
+     * Mapper pentru proiectia detaliata a unei recenzii cu JOIN catre {@code clienti} si {@code filme}.
+     * Listele {@code etichete} si {@code actoriComentarii} sunt initializate goale si populate ulterior.
+     */
     private static final RowMapper<RecenzieDetailResponse> DETAIL_MAPPER = (rs, rowNum) -> {
         Object notaObj = rs.getObject("nota");
         Integer nota = notaObj != null ? ((Number) notaObj).intValue() : null;
@@ -66,6 +79,7 @@ public class RecenzieDao {
         );
     };
 
+    /** Fragment SQL reutilizabil pentru selectia detaliata a recenziilor cu JOIN catre clienti si filme. */
     private static final String DETAIL_SELECT =
             "SELECT r.id, r.id_client, c.nume || ' ' || c.prenume AS nume_client, " +
             "r.id_film, f.titlu AS titlu_film, r.nota, r.sentiment, r.text_comentariu, r.data_postare " +
@@ -78,12 +92,21 @@ public class RecenzieDao {
         this.namedJdbcTemplate = namedJdbcTemplate;
     }
 
+    /**
+     * Returneaza toate recenziile, ordonate dupa ID.
+     * @return Lista recenziilor; lista vida daca tabelul este gol.
+     */
     public List<RecenzieResponse> findAll() {
         return jdbcTemplate.query(
                 "SELECT id, id_client, id_film, nota, sentiment, text_comentariu, data_postare FROM recenzii ORDER BY id",
                 RESPONSE_MAPPER);
     }
 
+    /**
+     * Cauta o recenzie dupa ID in proiectia simpla.
+     * @param id Identificatorul recenziei.
+     * @return Optional cu recenzia gasita, sau gol daca nu exista.
+     */
     public Optional<RecenzieResponse> findById(Long id) {
         List<RecenzieResponse> results = jdbcTemplate.query(
                 "SELECT id, id_client, id_film, nota, sentiment, text_comentariu, data_postare FROM recenzii WHERE id = ?",
@@ -91,6 +114,11 @@ public class RecenzieDao {
         return results.stream().findFirst();
     }
 
+    /**
+     * Cauta o recenzie dupa ID in proiectia detaliata (cu JOIN catre clienti si filme).
+     * @param id Identificatorul recenziei.
+     * @return Optional cu recenzia detaliata gasita, sau gol daca nu exista.
+     */
     public Optional<RecenzieDetailResponse> findDetailById(Long id) {
         List<RecenzieDetailResponse> results = jdbcTemplate.query(
                 DETAIL_SELECT + "WHERE r.id = ?",
@@ -98,8 +126,13 @@ public class RecenzieDao {
         return results.stream().findFirst();
     }
 
-    // sentiment = NULL la INSERT — triggerul trg_set_sentiment_recenzie il completeaza
-    // data_postare nu se trimite — are DEFAULT CURRENT_TIMESTAMP in BD
+    /**
+     * Insereaza o recenzie simpla (fara etichete sau comentarii actori) si returneaza ID-ul generat.
+     * {@code sentiment} este lasat {@code NULL} la INSERT — triggerul {@code trg_set_sentiment_recenzie}
+     * il calculeaza automat. {@code data_postare} are {@code DEFAULT CURRENT_TIMESTAMP} in baza de date.
+     * @param recenzie Obiectul cu datele recenziei de inserat.
+     * @return ID-ul generat de baza de date pentru noua recenzie.
+     */
     public Long insert(Recenzii recenzie) {
         String sql = "INSERT INTO recenzii (id_client, id_film, nota, sentiment, text_comentariu) VALUES (?, ?, ?, NULL, ?)";
         KeyHolder keyHolder = new GeneratedKeyHolder();
@@ -114,16 +147,34 @@ public class RecenzieDao {
         return Objects.requireNonNull(keyHolder.getKey()).longValue();
     }
 
+    /**
+     * Actualizeaza partial nota si/sau textul unei recenzii. Foloseste NVL pentru a pastra valorile existente.
+     * @param id  Identificatorul recenziei de actualizat.
+     * @param req Noile valori; campurile {@code null} nu suprascriu datele existente.
+     * @return Numarul de randuri afectate (1 daca recenzia exista, 0 altfel).
+     */
     public int update(Long id, UpdateRecenzieRequest req) {
         return jdbcTemplate.update(
                 "UPDATE recenzii SET nota = NVL(?, nota), text_comentariu = NVL(?, text_comentariu) WHERE id = ?",
                 req.getNota(), req.getTextComentariu(), id);
     }
 
+    /**
+     * Sterge o recenzie din baza de date dupa ID.
+     * @param id Identificatorul recenziei de sters.
+     * @return Numarul de randuri sterse (1 daca a existat, 0 altfel).
+     */
     public int deleteById(Long id) {
         return jdbcTemplate.update("DELETE FROM recenzii WHERE id = ?", id);
     }
 
+    /**
+     * Returneaza recenziile detaliate ale unui film, imbogatite cu etichete si comentarii despre actori.
+     * Executa trei interogari: una pentru recenzii, una pentru etichete si una pentru comentarii actori,
+     * toate filtrate dupa aceeasi lista de ID-uri de recenzii.
+     * @param idFilm Identificatorul filmului.
+     * @return Lista recenziilor detaliate, ordonata descrescator dupa data postarii.
+     */
     public List<RecenzieDetailResponse> findByFilmId(Long idFilm) {
         List<RecenzieDetailResponse> reviews = jdbcTemplate.query(
                 DETAIL_SELECT + "WHERE r.id_film = ? ORDER BY r.data_postare DESC",
@@ -168,6 +219,11 @@ public class RecenzieDao {
         return reviews;
     }
 
+    /**
+     * Returneaza toate recenziile scrise de un client, ordonate descrescator dupa data postarii.
+     * @param idClient Identificatorul clientului.
+     * @return Lista recenziilor clientului; lista vida daca nu a scris nicio recenzie.
+     */
     public List<RecenzieResponse> findByClientId(Long idClient) {
         return jdbcTemplate.query(
                 "SELECT id, id_client, id_film, nota, sentiment, text_comentariu, data_postare " +
@@ -175,6 +231,20 @@ public class RecenzieDao {
                 RESPONSE_MAPPER, idClient);
     }
 
+    /**
+     * Apeleaza procedura stocata Oracle {@code p_creeaza_recenzie_completa} pentru crearea atomica
+     * a unei recenzii cu etichete si comentarii despre actori.
+     * Foloseste tipurile Oracle {@code SYS.ODCINUMBERLIST} si {@code SYS.ODCIVARCHAR2LIST}
+     * pentru transmiterea array-urilor.
+     * @param idClient        ID-ul clientului care creeaza recenzia.
+     * @param idFilm          ID-ul filmului recenzat.
+     * @param nota            Nota acordata (1-10).
+     * @param textComentariu  Textul comentariului; poate fi {@code null}.
+     * @param etichetaIds     Lista ID-urilor etichetelor de asociat; poate fi {@code null} sau goala.
+     * @param actoriIds       Lista ID-urilor actorilor comentati; poate fi {@code null} sau goala.
+     * @param actoriComentarii Lista comentariilor pentru actori; trebuie sa aiba aceeasi lungime cu {@code actoriIds}.
+     * @return ID-ul recenziei create, returnat ca parametru OUT de procedura.
+     */
     public Long creeazaRecenzieCompleta(
             Long idClient, Long idFilm, Integer nota, String textComentariu,
             List<Long> etichetaIds, List<Long> actoriIds, List<String> actoriComentarii) {

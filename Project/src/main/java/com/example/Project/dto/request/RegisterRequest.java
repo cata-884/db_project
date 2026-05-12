@@ -10,4 +10,3 @@ public class RegisterRequest {
     private String prenume;
     private String email;
 }
-

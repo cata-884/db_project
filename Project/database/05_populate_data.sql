@@ -318,7 +318,7 @@ BEGIN
                 END LOOP;
         END LOOP;
 
-    -- CLIENTI
+    -- CLIENTI (Versiune integrata cu username si parola)
     FOR i IN 1..20 LOOP
             v_idx         := TRUNC(DBMS_RANDOM.VALUE(1, l_nume.COUNT + 1));
             v_temp_id     := TRUNC(DBMS_RANDOM.VALUE(1, l_prenume.COUNT + 1));
@@ -330,11 +330,21 @@ BEGIN
             v_idx     := TRUNC(DBMS_RANDOM.VALUE(1, l_strazi.COUNT + 1));
             v_strada  := l_strazi(v_idx);
 
-            INSERT INTO clienti (id, nume, prenume, telefon_fix_cod, telefon_fix_nr, adresa, oras, email, telefon_mobil_cod, telefon_mobil_nr, data_nastere)
+            -- Generam ID-ul inainte pentru a-l folosi la username/parola
+            v_temp_id := seq_clienti.NEXTVAL;
+
+            INSERT INTO clienti (
+                id, nume, prenume,
+                username, parola,
+                telefon_fix_cod, telefon_fix_nr, adresa, oras,
+                email, telefon_mobil_cod, telefon_mobil_nr, data_nastere
+            )
             VALUES (
-                       seq_clienti.NEXTVAL,
+                       v_temp_id,
                        v_nume_val,
                        v_prenume_val,
+                       'client' || v_temp_id, -- Username default: client1, client2...
+                       'parola' || v_temp_id, -- Parola default: parola1, parola2...
                        '+40',
                        TRUNC(DBMS_RANDOM.VALUE(1000000, 9999999)),
                        v_strada || ' Nr. ' || TRUNC(DBMS_RANDOM.VALUE(1, 99)),
@@ -358,12 +368,14 @@ BEGIN
     FOR i IN 1..120 LOOP
             SELECT id INTO v_id_1 FROM (SELECT id FROM clienti      ORDER BY DBMS_RANDOM.VALUE()) FETCH FIRST 1 ROW ONLY;
             SELECT id INTO v_id_2 FROM (SELECT id FROM versiuni_film ORDER BY DBMS_RANDOM.VALUE()) FETCH FIRST 1 ROW ONLY;
-            INSERT INTO vizualizari (id, id_client, id_versiune, data_vizualizare)
+            INSERT INTO vizualizari (id, id_client, id_versiune, data_vizualizare, durata, stare)
             VALUES (
                        seq_vizualizari.NEXTVAL,
                        v_id_1,
                        v_id_2,
-                       CURRENT_DATE - DBMS_RANDOM.VALUE(1, 100)
+                       CURRENT_DATE - DBMS_RANDOM.VALUE(1, 100),
+                       TRUNC(DBMS_RANDOM.VALUE(15, 120)),
+                       'COMPLETED'
                    );
         END LOOP;
 

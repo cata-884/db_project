@@ -4,7 +4,6 @@
     <file url="file://$PROJECT_DIR$/Project" dialect="OracleSqlPlus" />
     <file url="file://$PROJECT_DIR$/Project/database/01_create_tables.sql" dialect="OracleSqlPlus" />
     <file url="file://$PROJECT_DIR$/Project/database/05_populate_data.sql" dialect="OracleSqlPlus" />
-    <file url="file://$PROJECT_DIR$/Project/database/06_add_auth_columns.sql" dialect="OracleSqlPlus" />
     <file url="file://$PROJECT_DIR$/Project/database/99_drop_all.sql" dialect="OracleSqlPlus" />
   </component>
 </project>

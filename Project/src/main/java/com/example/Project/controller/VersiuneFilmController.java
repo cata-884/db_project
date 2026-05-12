@@ -10,6 +10,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
+/**
+ * Controller REST pentru consultarea versiunilor unui film (rezolutie, format, limbi).
+ * Expune resursa {@code /api/versiuni-film}.
+ */
 @RestController
 @RequestMapping("/api/versiuni-film")
 public class VersiuneFilmController {
@@ -17,6 +21,11 @@ public class VersiuneFilmController {
     @Autowired
     private VersiuneFilmService versiuneFilmService;
 
+    /**
+     * Returneaza toate versiunile disponibile ale unui film.
+     * @param idFilm Identificatorul filmului.
+     * @return Lista versiunilor filmului, ordonate dupa ID.
+     */
     @GetMapping("/film/{idFilm}")
     public List<VersiuneFilm> getByFilmId(@PathVariable Long idFilm) {
         return versiuneFilmService.getByFilmId(idFilm);

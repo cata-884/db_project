@@ -8,29 +8,61 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import java.sql.SQLException;
 import java.util.Map;
 
+/**
+ * Handler global de exceptii pentru toate controller-ele REST.
+ * Intercepteaza exceptiile aruncate in stratul de service sau DAO si le transforma
+ * in raspunsuri HTTP cu body JSON {@code {"error": "mesaj"}}.
+ * Trateaza si erorile Oracle specifice (ORA-00001, ORA-20001 etc.) intoarse de baza de date.
+ */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    /**
+     * Trateaza validarile de business aruncate din servicii.
+     * @param ex Exceptia cu mesajul de validare.
+     * @return HTTP 400 Bad Request cu descrierea erorii.
+     */
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<Map<String, String>> handleIllegalArgument(IllegalArgumentException ex) {
         return ResponseEntity.badRequest().body(Map.of("error", ex.getMessage()));
     }
 
+    /**
+     * Trateaza resursele inexistente.
+     * @param ex Exceptia cu mesajul de resursa negasita.
+     * @return HTTP 404 Not Found cu descrierea erorii.
+     */
     @ExceptionHandler(NotFoundException.class)
     public ResponseEntity<Map<String, String>> handleNotFound(NotFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", ex.getMessage()));
     }
 
+    /**
+     * Trateaza accesul neautorizat la resurse ale altor clienti.
+     * @param ex Exceptia cu mesajul de acces interzis.
+     * @return HTTP 403 Forbidden cu descrierea erorii.
+     */
     @ExceptionHandler(ForbiddenException.class)
     public ResponseEntity<Map<String, String>> handleForbidden(ForbiddenException ex) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error", ex.getMessage()));
     }
 
+    /**
+     * Fallback pentru orice exceptie de runtime neacoperita de celelalte handlere.
+     * @param ex Exceptia neasteptata.
+     * @return HTTP 500 Internal Server Error.
+     */
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<Map<String, String>> handleRuntime(RuntimeException ex) {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", ex.getMessage()));
     }
 
+    /**
+     * Trateaza erorile Oracle specifice intoarse prin {@link org.springframework.dao.DataAccessException}.
+     * Mapeaza codurile ORA la statusuri HTTP semantice (400, 404, 409, 500).
+     * @param ex Exceptia de acces la date, posibil cu cauza {@link java.sql.SQLException}.
+     * @return Raspuns HTTP cu statusul si mesajul corespunzator erorii Oracle.
+     */
     @ExceptionHandler(org.springframework.dao.DataAccessException.class)
     public ResponseEntity<Map<String, String>> handleDataAccess(org.springframework.dao.DataAccessException ex) {
         Throwable cause = ex.getCause();

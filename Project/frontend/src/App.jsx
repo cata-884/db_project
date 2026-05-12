@@ -7,7 +7,7 @@ import ProfilePage from './pages/ProfilePage.jsx';
 import StatsPage from './pages/StatsPage.jsx';
 import AccountPage from './pages/AccountPage.jsx';
 import { isAuthenticated } from './auth.js';
-
+//
 function ProtectedRoute({ children }) {
   return isAuthenticated() ? children : <Navigate to="/login" replace />;
 }

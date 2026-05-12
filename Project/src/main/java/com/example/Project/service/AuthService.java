@@ -7,6 +7,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+/**
+ * Serviciu pentru autentificare si inregistrare.
+ * Gestioneaza validarea credentialelor, hash-uirea parolelor si crearea sesiunilor.
+ */
 @Service
 public class AuthService {
 
@@ -19,6 +23,13 @@ public class AuthService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    /**
+     * Autentifica un client si creeaza o sesiune noua.
+     * @param username Numele de utilizator.
+     * @param parola   Parola in clar.
+     * @return Token-ul de sesiune si datele clientului autentificat.
+     * @throws IllegalArgumentException daca credentialele sunt invalide sau incorecte.
+     */
     public LoginResponse login(String username, String parola) {
         if (username == null || username.isBlank())
             throw new IllegalArgumentException("Username-ul este obligatoriu");
@@ -37,6 +48,16 @@ public class AuthService {
                 client.getNume(), client.getPrenume(), client.getEmail());
     }
 
+    /**
+     * Inregistreaza un client nou, hash-uieste parola si creeaza o sesiune imediata.
+     * @param username Numele de utilizator dorit; trebuie sa fie unic.
+     * @param parola   Parola in clar; va fi hash-uita cu BCrypt.
+     * @param nume     Numele de familie; obligatoriu.
+     * @param prenume  Prenumele; obligatoriu.
+     * @param email    Adresa de email; optionala.
+     * @return Token-ul de sesiune si datele noului client.
+     * @throws IllegalArgumentException daca oricare camp obligatoriu lipseste sau username-ul e deja folosit.
+     */
     public LoginResponse register(String username, String parola, String nume, String prenume, String email) {
         if (username == null || username.isBlank())
             throw new IllegalArgumentException("Username-ul este obligatoriu");

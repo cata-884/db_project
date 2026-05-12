@@ -5,6 +5,11 @@ import com.example.Project.exception.NotFoundException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
+/**
+ * Serviciu de verificare a proprietatii resurselor.
+ * Se asigura ca un client autentificat poate modifica sau sterge
+ * doar resursele care ii apartin, aruncand exceptii adecvate in caz contrar.
+ */
 @Service
 public class OwnershipService {
 
@@ -14,6 +19,13 @@ public class OwnershipService {
         this.jdbcTemplate = jdbcTemplate;
     }
 
+    /**
+     * Verifica ca recenzia apartine clientului autentificat curent.
+     * @param idRecenzie      Identificatorul recenziei de verificat.
+     * @param idClientCurent  ID-ul clientului autentificat, extras din sesiune.
+     * @throws NotFoundException  daca recenzia nu exista.
+     * @throws ForbiddenException daca recenzia apartine altui client.
+     */
     public void verificaRecenzie(Long idRecenzie, Long idClientCurent) {
         Long owner = jdbcTemplate.query(
                 "SELECT id_client FROM recenzii WHERE id = ?",
@@ -28,6 +40,13 @@ public class OwnershipService {
         }
     }
 
+    /**
+     * Verifica ca vizualizarea apartine clientului autentificat curent.
+     * @param idVizualizare  Identificatorul vizualizarii de verificat.
+     * @param idClientCurent ID-ul clientului autentificat, extras din sesiune.
+     * @throws NotFoundException  daca vizualizarea nu exista.
+     * @throws ForbiddenException daca vizualizarea apartine altui client.
+     */
     public void verificaVizualizare(Long idVizualizare, Long idClientCurent) {
         Long owner = jdbcTemplate.query(
                 "SELECT id_client FROM vizualizari WHERE id = ?",

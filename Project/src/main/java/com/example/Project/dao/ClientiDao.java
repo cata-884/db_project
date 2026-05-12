@@ -6,6 +6,10 @@ import org.springframework.stereotype.Repository;
 
 import java.sql.Date;
 
+/**
+ * Componenta de acces la date (DAO) pentru actualizarea datelor de contact ale clientilor.
+ * Gestioneaza exclusiv operatia de UPDATE pe tabelul {@code clienti} folosind JdbcTemplate.
+ */
 @Repository
 public class ClientiDao {
 
@@ -15,6 +19,13 @@ public class ClientiDao {
         this.jdbcTemplate = jdbcTemplate;
     }
 
+    /**
+     * Actualizeaza datele de contact ale unui client (telefon, adresa, oras, data nasterii).
+     * Campurile {@code null} din request vor suprascrie explicit valorile existente.
+     * @param id  Identificatorul clientului de actualizat.
+     * @param req Obiectul cu noile date de contact.
+     * @return Numarul de randuri afectate (1 daca clientul a fost gasit, 0 altfel).
+     */
     public int update(Long id, UpdateClientRequest req) {
         return jdbcTemplate.update(
                 "UPDATE clienti SET " +

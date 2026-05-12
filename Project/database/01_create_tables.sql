@@ -49,24 +49,29 @@ CREATE TABLE distributie (
 );
 
 CREATE TABLE clienti (
-    id                  NUMBER DEFAULT seq_clienti.NEXTVAL PRIMARY KEY,
-    nume                VARCHAR2(100) NOT NULL,
-    prenume             VARCHAR2(100) NOT NULL,
-    telefon_fix_cod     VARCHAR2(10),
-    telefon_fix_nr      VARCHAR2(20),
-    adresa              VARCHAR2(300),
-    oras                VARCHAR2(100),
-    email               VARCHAR2(200),
-    telefon_mobil_cod   VARCHAR2(10),
-    telefon_mobil_nr    VARCHAR2(20),
-    data_nastere        DATE
+                         id                NUMBER DEFAULT seq_clienti.NEXTVAL PRIMARY KEY,
+                         nume              VARCHAR2(100) NOT NULL,
+                         prenume           VARCHAR2(100) NOT NULL,
+                         username          VARCHAR2(50),
+                         parola            VARCHAR2(100),
+                         telefon_fix_cod   VARCHAR2(10),
+                         telefon_fix_nr    VARCHAR2(20),
+                         adresa            VARCHAR2(300),
+                         oras              VARCHAR2(100),
+                         email             VARCHAR2(200),
+                         telefon_mobil_cod VARCHAR2(10),
+                         telefon_mobil_nr  VARCHAR2(20),
+                         data_nastere      DATE,
+                         CONSTRAINT uq_clienti_username UNIQUE (username)
 );
-
 CREATE TABLE vizualizari (
     id                  NUMBER DEFAULT seq_vizualizari.NEXTVAL PRIMARY KEY,
     id_client           NUMBER NOT NULL REFERENCES clienti(id),
     id_versiune         NUMBER NOT NULL REFERENCES versiuni_film(id),
-    data_vizualizare    DATE
+    data_vizualizare    DATE,
+    durata              NUMBER(5)    CHECK (durata IS NULL OR durata >= 0),
+    stare               VARCHAR2(20) DEFAULT 'IN_PROGRESS'
+                                     CHECK (stare IN ('IN_PROGRESS','COMPLETED','PAUSED','ABANDONED'))
 );
 
 CREATE TABLE etichete (

@@ -17,22 +17,35 @@ import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Componenta de acces la date (DAO) pentru analizele statistice si recomandari.
+ * Toate metodele apeleaza proceduri stocate Oracle care returneaza cursoare {@code SYS_REFCURSOR}.
+ * Cursorele sunt citite manual din parametrii OUT ai {@link java.sql.CallableStatement}.
+ */
 @Repository
 public class StatsDao {
 
-    // Oracle SYS_REFCURSOR type code (oracle.jdbc.OracleTypes.CURSOR = -10)
+    /** Codul de tip Oracle pentru SYS_REFCURSOR ({@code oracle.jdbc.OracleTypes.CURSOR = -10}). */
     private static final int CURSOR = -10;
+
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
+    /**
+     * Apeleaza procedura {@code p_recomandari_pentru_client} si returneaza filmele recomandate.
+     * @param idClient Identificatorul clientului.
+     * @return Lista filmelor recomandate bazata pe preferintele clientului.
+     */
     public List<RecomandareResponse> recomandari(Long idClient) {
         CallableStatementCreator creator = con -> con.prepareCall("{call p_recomandari_pentru_client(?, ?)}");
         CallableStatementCallback<List<RecomandareResponse>> callback = cs -> {
             cs.setLong(1, idClient);
+            //pasam un cursor
             cs.registerOutParameter(2, CURSOR);
             cs.execute();
             List<RecomandareResponse> result = new ArrayList<>();
+            //trecem prin cursorul returnat si construim lista de recomandari
             try (ResultSet rs = (ResultSet) cs.getObject(2)) {
                 while (rs.next()) {
                     result.add(new RecomandareResponse(
@@ -50,6 +63,12 @@ public class StatsDao {
         return jdbcTemplate.execute(creator, callback);
     }
 
+    /**
+     * Apeleaza procedura {@code p_profil_cinematografic} si returneaza profilul cinematografic.
+     * @param idClient Identificatorul clientului.
+     * @return Profilul cu categoria preferata, actorul preferat, rating mediu etc.,
+     *         sau {@code null} daca clientul nu are activitate.
+     */
     public ProfilCinematograficResponse profilCinematografic(Long idClient) {
         CallableStatementCreator creator = con -> con.prepareCall("{call p_profil_cinematografic(?, ?)}");
         CallableStatementCallback<ProfilCinematograficResponse> callback = cs -> {
@@ -79,6 +98,10 @@ public class StatsDao {
         return jdbcTemplate.execute(creator, callback);
     }
 
+    /**
+     * Apeleaza procedura {@code p_analiza_sezoniera} si returneaza analiza sezoniera a vizionarilor.
+     * @return Lista cu numarul de vizionari si rangul fiecarei categorii pe luna.
+     */
     public List<AnalizaSezonierResponse> analizaSezoniera() {
         CallableStatementCreator creator = con -> con.prepareCall("{call p_analiza_sezoniera(?)}");
         CallableStatementCallback<List<AnalizaSezonierResponse>> callback = cs -> {
@@ -100,6 +123,12 @@ public class StatsDao {
         return jdbcTemplate.execute(creator, callback);
     }
 
+    /**
+     * Apeleaza procedura {@code p_clienti_similari} si returneaza clientii cu preferinte similare.
+     * @param idClient Identificatorul clientului de referinta.
+     * @param topN     Numarul maxim de clienti similari de returnat.
+     * @return Lista clientilor similari cu scorul de similaritate.
+     */
     public List<ClientSimilarResponse> clientiSimilari(Long idClient, int topN) {
         CallableStatementCreator creator = con -> con.prepareCall("{call p_clienti_similari(?, ?, ?)}");
         CallableStatementCallback<List<ClientSimilarResponse>> callback = cs -> {
@@ -122,6 +151,12 @@ public class StatsDao {
         return jdbcTemplate.execute(creator, callback);
     }
 
+    /**
+     * Apeleaza procedura {@code p_predictii_sezoniere} si returneaza predictiile pentru o luna data.
+     * @param luna Luna calendaristica (1-12).
+     * @param topN Numarul maxim de filme de returnat.
+     * @return Lista filmelor cu scorul de predictie calculat.
+     */
     public List<PredictieSezoneraResponse> predictiiSezoniere(int luna, int topN) {
         CallableStatementCreator creator = con -> con.prepareCall("{call p_predictii_sezoniere(?, ?, ?)}");
         CallableStatementCallback<List<PredictieSezoneraResponse>> callback = cs -> {
@@ -147,6 +182,11 @@ public class StatsDao {
         return jdbcTemplate.execute(creator, callback);
     }
 
+    /**
+     * Apeleaza procedura {@code p_grupare_clienti} si returneaza gruparea clientilor.
+     * @param threshold Pragul de similaritate pentru includere in aceeasi grupa (0-1).
+     * @return Lista clientilor cu ID-ul grupei din care fac parte.
+     */
     public List<GrupareClientiResponse> grupareClienti(double threshold) {
         CallableStatementCreator creator = con -> con.prepareCall("{call p_grupare_clienti(?, ?)}");
         CallableStatementCallback<List<GrupareClientiResponse>> callback = cs -> {
